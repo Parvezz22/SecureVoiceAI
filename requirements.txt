@@ -1,0 +1,8 @@
+torch
+torchaudio
+speechbrain
+soundfile
+numpy
+scipy
+librosa
+scikit-learn
