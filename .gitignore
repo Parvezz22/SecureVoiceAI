@@ -21,3 +21,5 @@ data/raw/
 # OS files
 .DS_Store
 Thumbs.db
+# Voice biometric profiles
+voice_profiles/*.pt

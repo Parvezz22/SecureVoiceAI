@@ -1,6 +1,6 @@
+import os
 import sys
 import time
-from datetime import datetime
 
 import torch
 import torchaudio
@@ -9,18 +9,18 @@ import torchcodec
 
 # ============================================================
 # SECUREVOICE AI
-# AUTHENTICATION ENGINE
+# MULTI-USER AUTHENTICATION ENGINE
 # ============================================================
 
 MODEL_PATH = "models/ecapa"
-PROFILE_PATH = "voice_profiles/parvez_voice.pt"
+PROFILE_DIRECTORY = "voice_profiles"
 
 TARGET_SAMPLE_RATE = 16000
 THRESHOLD = 0.60
 
 
 # ============================================================
-# LOAD AND PREPARE AUDIO
+# PREPARE AUDIO
 # ============================================================
 
 def prepare_audio(voice_path):
@@ -28,6 +28,7 @@ def prepare_audio(voice_path):
     print("Loading new voice...")
 
     try:
+
         audio, sample_rate = torchaudio.load(
             voice_path
         )
@@ -64,7 +65,7 @@ def prepare_audio(voice_path):
         print("Mono conversion completed!")
 
     # --------------------------------------------------------
-    # Resample to 16 kHz
+    # Resample
     # --------------------------------------------------------
 
     if sample_rate != TARGET_SAMPLE_RATE:
@@ -106,19 +107,16 @@ def prepare_audio(voice_path):
         f"Audio shape: {audio.shape}"
     )
 
-    return audio, sample_rate
+    return audio
 
 
 # ============================================================
-# LOAD SPEAKER RECOGNITION MODEL
+# LOAD SPEAKER MODEL
 # ============================================================
 
 def load_model():
 
     print("\nLoading speaker recognition model...")
-
-    # Import SpeechBrain AFTER audio/TorchCodec
-    # has already been initialized.
 
     from speechbrain.inference.speaker import (
         SpeakerRecognition
@@ -135,19 +133,65 @@ def load_model():
 
 
 # ============================================================
-# LOAD REGISTERED VOICE PROFILE
+# LOAD USER PROFILE
 # ============================================================
 
-def load_registered_profile():
+def load_profile(username):
 
-    print("Loading registered voice profile...")
-
-    registered_embedding = torch.load(
-        PROFILE_PATH,
-        map_location="cpu"
+    profile_path = os.path.join(
+        PROFILE_DIRECTORY,
+        f"{username}_voice.pt"
     )
 
-    print("Registered voice profile loaded!")
+    if not os.path.exists(profile_path):
+
+        raise FileNotFoundError(
+            f"No voice profile found for user "
+            f"'{username}'."
+        )
+
+    print(
+        f"Loading voice profile for user "
+        f"'{username}'..."
+    )
+
+    try:
+
+        registered_embedding = torch.load(
+            profile_path,
+            map_location="cpu"
+        )
+
+    except Exception as e:
+
+        raise RuntimeError(
+            f"Could not load voice profile: {e}"
+        )
+
+    if not isinstance(
+        registered_embedding,
+        torch.Tensor
+    ):
+
+        raise RuntimeError(
+            "Voice profile does not contain "
+            "a valid tensor."
+        )
+
+    if registered_embedding.numel() == 0:
+
+        raise RuntimeError(
+            "Voice profile is empty."
+        )
+
+    print(
+        "Voice profile loaded successfully!"
+    )
+
+    print(
+        f"Profile shape: "
+        f"{registered_embedding.shape}"
+    )
 
     return registered_embedding
 
@@ -165,7 +209,7 @@ def generate_embedding(
 
     with torch.no_grad():
 
-        embedding = verification.encode_batch(
+        new_embedding = verification.encode_batch(
             audio
         )
 
@@ -173,17 +217,20 @@ def generate_embedding(
         "Voice embedding generated successfully!"
     )
 
-    return embedding
+    return new_embedding
 
 
 # ============================================================
-# CALCULATE SIMILARITY
+# COMPARE VOICES
 # ============================================================
 
-def calculate_similarity(
+def compare_embeddings(
     registered_embedding,
     new_embedding
 ):
+
+    print("\nComparing registered voice "
+          "with new voice...\n")
 
     score = torch.nn.functional.cosine_similarity(
         registered_embedding.flatten(),
@@ -195,247 +242,94 @@ def calculate_similarity(
 
 
 # ============================================================
-# DETERMINE CONFIDENCE
+# AUTHENTICATION DECISION
 # ============================================================
 
-def determine_confidence(score):
-
-    if score >= 0.75:
-
-        return "VERY HIGH"
-
-    elif score >= 0.60:
-
-        return "HIGH"
-
-    elif score >= 0.40:
-
-        return "LOW"
-
-    else:
-
-        return "VERY LOW"
-
-
-# ============================================================
-# AUTHENTICATE VOICE
-# ============================================================
-
-def authenticate(
-    verification,
-    registered_embedding,
-    audio,
-    voice_path
-):
-
-    start_time = time.perf_counter()
-
-    # --------------------------------------------------------
-    # Generate embedding
-    # --------------------------------------------------------
-
-    new_embedding = generate_embedding(
-        verification,
-        audio
-    )
-
-    # --------------------------------------------------------
-    # Compare voices
-    # --------------------------------------------------------
-
-    print(
-        "\nComparing registered voice "
-        "with new voice..."
-    )
-
-    score = calculate_similarity(
-        registered_embedding,
-        new_embedding
-    )
-
-    # --------------------------------------------------------
-    # Authentication decision
-    # --------------------------------------------------------
+def authenticate(score):
 
     if score >= THRESHOLD:
 
         authentication = "SUCCESS"
-        same_speaker = True
+        same_speaker = "YES"
+
+        if score >= 0.85:
+
+            confidence = "VERY HIGH"
+
+        elif score >= 0.70:
+
+            confidence = "HIGH"
+
+        else:
+
+            confidence = "MODERATE"
 
     else:
 
         authentication = "FAILED"
-        same_speaker = False
+        same_speaker = "NO"
+        confidence = "LOW"
 
-    # --------------------------------------------------------
-    # Confidence
-    # --------------------------------------------------------
-
-    confidence = determine_confidence(
-        score
+    return (
+        authentication,
+        same_speaker,
+        confidence
     )
-
-    # --------------------------------------------------------
-    # Processing time
-    # --------------------------------------------------------
-
-    processing_time = (
-        time.perf_counter()
-        - start_time
-    )
-
-    # --------------------------------------------------------
-    # Timestamp
-    # --------------------------------------------------------
-
-    timestamp = datetime.now().isoformat(
-        timespec="seconds"
-    )
-
-    # --------------------------------------------------------
-    # Structured result
-    # --------------------------------------------------------
-
-    result = {
-
-        "timestamp": timestamp,
-
-        "voice_file": voice_path,
-
-        "similarity_score": round(
-            score,
-            4
-        ),
-
-        "threshold": THRESHOLD,
-
-        "confidence": confidence,
-
-        "authentication": authentication,
-
-        "same_speaker": same_speaker,
-
-        "processing_time_seconds": round(
-            processing_time,
-            4
-        )
-    }
-
-    return result
 
 
 # ============================================================
-# DISPLAY RESULT
-# ============================================================
-
-def display_result(result):
-
-    print("\n")
-    print("----------------------------------------")
-    print("          SECUREVOICE AI")
-    print("       AUTHENTICATION ENGINE")
-    print("----------------------------------------")
-
-    print(
-        f"Timestamp:             "
-        f"{result['timestamp']}"
-    )
-
-    print(
-        f"Voice file:            "
-        f"{result['voice_file']}"
-    )
-
-    print(
-        f"Similarity score:      "
-        f"{result['similarity_score']:.4f}"
-    )
-
-    print(
-        f"Threshold:             "
-        f"{result['threshold']:.2f}"
-    )
-
-    print(
-        f"Confidence:            "
-        f"{result['confidence']}"
-    )
-
-    print(
-        f"Authentication:        "
-        f"{result['authentication']}"
-    )
-
-    print(
-        f"Same speaker:          "
-        f"{'YES' if result['same_speaker'] else 'NO'}"
-    )
-
-    print(
-        f"Processing time:       "
-        f"{result['processing_time_seconds']:.4f} seconds"
-    )
-
-    print("----------------------------------------")
-
-    if result["same_speaker"]:
-
-        print(
-            "RESULT: Voice authentication successful."
-        )
-
-    else:
-
-        print(
-            "RESULT: Voice authentication failed."
-        )
-
-    print("----------------------------------------")
-
-
-# ============================================================
-# MAIN PROGRAM
+# MAIN AUTHENTICATION PROCESS
 # ============================================================
 
 def main():
 
+    start_time = time.perf_counter()
+
     # --------------------------------------------------------
-    # Check command-line argument
+    # Check arguments
     # --------------------------------------------------------
 
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
 
         print("\nUsage:")
-
         print(
             "python authentication_engine.py "
-            "<voice_file>"
+            "<username> <voice_file>"
         )
 
         print("\nExample:")
-
         print(
             "python authentication_engine.py "
-            "Data/raw/voice1.wav"
+            "testuser Data/raw/voice1.wav"
         )
 
         sys.exit(1)
 
-    voice_path = sys.argv[1]
+    username = sys.argv[1]
+    voice_path = sys.argv[2]
 
     try:
 
-        # ====================================================
-        # IMPORTANT:
-        # LOAD AUDIO BEFORE SPEECHBRAIN
-        # ====================================================
+        # ----------------------------------------------------
+        # Validate voice file
+        # ----------------------------------------------------
 
-        audio, sample_rate = prepare_audio(
+        if not os.path.exists(voice_path):
+
+            raise FileNotFoundError(
+                f"Voice file not found: {voice_path}"
+            )
+
+        # ----------------------------------------------------
+        # Prepare audio
+        # ----------------------------------------------------
+
+        audio = prepare_audio(
             voice_path
         )
 
         # ----------------------------------------------------
-        # Now load SpeechBrain
+        # Load speaker model
         # ----------------------------------------------------
 
         verification = load_model()
@@ -444,26 +338,125 @@ def main():
         # Load registered profile
         # ----------------------------------------------------
 
-        registered_embedding = (
-            load_registered_profile()
+        registered_embedding = load_profile(
+            username
         )
 
         # ----------------------------------------------------
-        # Authenticate
+        # Generate embedding
         # ----------------------------------------------------
 
-        result = authenticate(
+        new_embedding = generate_embedding(
             verification,
+            audio
+        )
+
+        # ----------------------------------------------------
+        # Compare voices
+        # ----------------------------------------------------
+
+        score = compare_embeddings(
             registered_embedding,
-            audio,
-            voice_path
+            new_embedding
+        )
+
+        # ----------------------------------------------------
+        # Authentication decision
+        # ----------------------------------------------------
+
+        (
+            authentication,
+            same_speaker,
+            confidence
+        ) = authenticate(score)
+
+        # ----------------------------------------------------
+        # Processing time
+        # ----------------------------------------------------
+
+        processing_time = (
+            time.perf_counter() - start_time
         )
 
         # ----------------------------------------------------
         # Display result
         # ----------------------------------------------------
 
-        display_result(result)
+        print("\n")
+        print("----------------------------------------")
+        print("          SECUREVOICE AI")
+        print("       AUTHENTICATION ENGINE")
+        print("----------------------------------------")
+
+        print(
+            f"Timestamp:             "
+            f"{time.strftime('%Y-%m-%dT%H:%M:%S')}"
+        )
+
+        print(
+            f"User:                  {username}"
+        )
+
+        print(
+            f"Voice file:            {voice_path}"
+        )
+
+        print(
+            f"Similarity score:      {score:.4f}"
+        )
+
+        print(
+            f"Threshold:             {THRESHOLD:.2f}"
+        )
+
+        print(
+            f"Confidence:            {confidence}"
+        )
+
+        print(
+            f"Authentication:        {authentication}"
+        )
+
+        print(
+            f"Same speaker:          {same_speaker}"
+        )
+
+        print(
+            f"Processing time:       "
+            f"{processing_time:.4f} seconds"
+        )
+
+        print("----------------------------------------")
+
+        if authentication == "SUCCESS":
+
+            print(
+                "RESULT: Voice authentication successful."
+            )
+
+        else:
+
+            print(
+                "RESULT: Voice authentication failed."
+            )
+
+        print("----------------------------------------")
+
+    except FileNotFoundError as e:
+
+        print("\n")
+        print("----------------------------------------")
+        print("          SECUREVOICE AI")
+        print("              ERROR")
+        print("----------------------------------------")
+
+        print(
+            f"Error: {e}"
+        )
+
+        print("----------------------------------------")
+
+        sys.exit(1)
 
     except Exception as e:
 
