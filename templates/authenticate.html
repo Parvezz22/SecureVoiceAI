@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Authentication | SecureVoiceAI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<div class="dashboard">
+
+```
+<aside class="sidebar">
+    <div class="logo">SecureVoiceAI</div>
+
+    <nav>
+        <a href="/">Dashboard</a>
+        <a href="/enroll-page">Voice Enrollment</a>
+        <a href="/authenticate-page" class="active">Authentication</a>
+    </nav>
+</aside>
+
+<main class="main-content">
+
+    <header class="topbar">
+        <h2>Voice Authentication</h2>
+        <span class="status">System Online</span>
+    </header>
+
+    <section class="welcome-card">
+        <h1>Verify Your Identity</h1>
+        <p>Authenticate your identity using your enrolled voice profile.</p>
+    </section>
+
+    <section class="form-card">
+
+        <h2>Authenticate with Voice</h2>
+
+        <form id="authenticationForm">
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Enter your enrolled username"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="voice">Upload New Voice Recording</label>
+                <input
+                    type="file"
+                    id="voice"
+                    name="voice"
+                    accept=".wav,.mp3,.flac,.ogg"
+                    required
+                >
+                <small>Upload a new recording of the enrolled user's voice.</small>
+            </div>
+
+            <button type="submit" class="btn">
+                Authenticate Voice
+            </button>
+
+        </form>
+
+        <div id="result" class="result-box"></div>
+
+    </section>
+
+</main>
+```
+
+</div>
+
+<script src="/static/authenticate.js"></script>
+
+</body>
+</html>

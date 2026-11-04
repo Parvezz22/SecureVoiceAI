@@ -1,4 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 import os
 import shutil
 import tempfile
@@ -14,6 +16,12 @@ app = FastAPI(
     description="AI-powered Voice Authentication System",
     version="1.0"
 )
+# Serve CSS and JavaScript files
+app.mount(
+    "/static",
+    StaticFiles(directory="static"),
+    name="static"
+)
 
 # Load ECAPA model once when the server starts
 verification_model = None
@@ -27,10 +35,16 @@ def load_speaker_model():
 
 @app.get("/")
 def home():
-    return {
-        "message": "Welcome to SecureVoiceAI",
-        "status": "API is running"
-    }
+    return FileResponse("templates/index.html")
+
+# Enrollment page
+@app.get("/enroll-page")
+def enrollment_page():
+    return FileResponse("templates/enroll.html")
+
+@app.get("/authenticate-page")
+def authentication_page():
+    return FileResponse("templates/authenticate.html")
 
 
 @app.get("/health")

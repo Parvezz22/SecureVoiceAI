@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Enrollment | SecureVoiceAI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+```
+<div class="sidebar">
+    <h2 class="logo">SecureVoice<span>AI</span></h2>
+
+    <nav>
+        <a href="/">Dashboard</a>
+        <a href="/enroll-page" class="active">Voice Enrollment</a>
+        <a href="/authenticate-page">Authentication</a>
+    </nav>
+
+    <div class="sidebar-footer">
+        AI-Powered Voice Security
+    </div>
+</div>
+
+<main class="main-content">
+
+    <header class="topbar">
+        <div>
+            <h1>Voice Enrollment</h1>
+            <p>Register a new user using their unique voice.</p>
+        </div>
+    </header>
+
+    <section class="welcome-card">
+        <p class="eyebrow">NEW USER REGISTRATION</p>
+        <h2>Register Your Voice</h2>
+        <p>
+            Upload a clear voice recording. Our ECAPA-TDNN
+            AI model will generate a unique voice embedding
+            and securely save your voice profile.
+        </p>
+    </section>
+
+    <section class="action-card">
+
+        <form id="enrollmentForm">
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Enter username"
+                    minlength="3"
+                    maxlength="30"
+                    pattern="[a-zA-Z0-9_-]+"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="voice">Voice Recording</label>
+                <input
+                    type="file"
+                    id="voice"
+                    name="voice"
+                    accept=".wav,.mp3,.flac,.ogg"
+                    required
+                >
+                <small>Upload a clear voice recording.</small>
+            </div>
+
+            <button type="submit" class="btn">
+                Enroll Voice
+            </button>
+
+        </form>
+
+        <div id="result" class="result-box"></div>
+
+    </section>
+
+    <footer>
+        SecureVoiceAI © 2026 | Voice Enrollment
+    </footer>
+
+</main>
+
+<script src="/static/enroll.js"></script>
+```
+
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureVoiceAI | Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+```
+<div class="sidebar">
+    <h2 class="logo">SecureVoice<span>AI</span></h2>
+
+    <nav>
+        <a href="/" class="active">Dashboard</a>
+        <a href="#enrollment">Voice Enrollment</a>
+        <a href="#authentication">Authentication</a>
+    </nav>
+
+    <div class="sidebar-footer">
+        AI-Powered Voice Security
+    </div>
+</div>
+
+<main class="main-content">
+
+    <header class="topbar">
+        <div>
+            <h1>Dashboard</h1>
+            <p>Welcome to your voice authentication system.</p>
+        </div>
+
+        <div class="status-badge">
+            ● System Online
+        </div>
+    </header>
+
+    <section class="welcome-card">
+        <div>
+            <p class="eyebrow">VOICE BIOMETRIC SECURITY</p>
+            <h2>Your Voice. Your Identity.</h2>
+            <p>
+                SecureVoiceAI uses advanced AI technology
+                to recognize and authenticate individuals
+                through their unique voice characteristics.
+            </p>
+        </div>
+    </section>
+
+    <section class="stats-grid">
+
+        <div class="stat-card">
+            <p>AI Model</p>
+            <h2>ECAPA-TDNN</h2>
+            <span>Speaker Recognition</span>
+        </div>
+
+        <div class="stat-card">
+            <p>Embedding Size</p>
+            <h2>192</h2>
+            <span>Voice Features</span>
+        </div>
+
+        <div class="stat-card">
+            <p>Similarity Threshold</p>
+            <h2>0.60</h2>
+            <span>Authentication Score</span>
+        </div>
+
+    </section>
+
+    <section class="action-section">
+
+        <h2>Voice Security Operations</h2>
+
+        <div class="action-grid">
+
+            <div class="action-card" id="enrollment">
+                <div class="card-icon">01</div>
+                <h3>Voice Enrollment</h3>
+                <p>
+                    Register a new user by uploading
+                    their voice recording.
+                </p>
+                <a href="/enroll-page" class="btn">
+                    Enroll User
+                </a>
+            </div>
+
+            <div class="action-card" id="authentication">
+                <div class="card-icon">02</div>
+                <h3>Voice Authentication</h3>
+                <p>
+                    Verify a registered user's identity
+                    using a new voice recording.
+                </p>
+                <a href="/authenticate-page" class="btn">
+                    Authenticate
+                </a>
+            </div>
+
+        </div>
+
+    </section>
+
+    <footer>
+        SecureVoiceAI © 2026 | AI-Powered Voice Authentication
+    </footer>
+
+</main>
+```
+
+</body>
+</html>
