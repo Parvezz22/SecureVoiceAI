@@ -276,7 +276,55 @@ def authenticate(score):
         confidence
     )
 
+# ============================================================
+# REUSABLE AUTHENTICATION FUNCTION
+# ============================================================
 
+def authenticate_voice(username, voice_path, verification):
+
+    start_time = time.perf_counter()
+
+    if not os.path.exists(voice_path):
+        raise FileNotFoundError(
+            f"Voice file not found: {voice_path}"
+        )
+
+    # Prepare audio
+    audio = prepare_audio(voice_path)
+
+    # Load registered voice profile
+    registered_embedding = load_profile(username)
+
+    # Generate new voice embedding
+    new_embedding = generate_embedding(
+        verification,
+        audio
+    )
+
+    # Compare voices
+    score = compare_embeddings(
+        registered_embedding,
+        new_embedding
+    )
+
+    # Make authentication decision
+    authentication, same_speaker, confidence = authenticate(
+        score
+    )
+
+    processing_time = time.perf_counter() - start_time
+
+    # Return structured result
+    return {
+        "username": username,
+        "authentication": authentication,
+        "same_speaker": same_speaker == "YES",
+        "similarity_score": round(score, 4),
+        "threshold": THRESHOLD,
+        "confidence": confidence,
+        "processing_time": round(processing_time, 4),
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S")
+    }
 # ============================================================
 # MAIN AUTHENTICATION PROCESS
 # ============================================================

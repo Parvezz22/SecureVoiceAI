@@ -201,7 +201,65 @@ def save_profile(
     )
 
     return profile_path
+# ============================================================
+# REUSABLE ENROLLMENT FUNCTION FOR FASTAPI
+# ============================================================
 
+def enroll_voice(username, voice_path, verification):
+
+    import re
+    import time
+
+    start_time = time.perf_counter()
+
+    # Validate username
+    if not re.fullmatch(r"[a-zA-Z0-9_-]{3,30}", username):
+        raise ValueError(
+            "Username must be 3-30 characters and contain "
+            "only letters, numbers, underscores or hyphens."
+        )
+
+    # Check whether audio file exists
+    if not os.path.exists(voice_path):
+        raise FileNotFoundError(
+            f"Voice file not found: {voice_path}"
+        )
+
+    # Prevent duplicate enrollment
+    profile_path = os.path.join(
+        PROFILE_DIRECTORY,
+        f"{username}_voice.pt"
+    )
+
+    if os.path.exists(profile_path):
+        raise FileExistsError(
+            f"User '{username}' is already enrolled."
+        )
+
+    # Prepare audio
+    audio = prepare_audio(voice_path)
+
+    # Generate voice embedding
+    embedding = generate_embedding(
+        verification,
+        audio
+    )
+
+    # Save voice profile
+    saved_path = save_profile(
+        embedding,
+        username
+    )
+
+    processing_time = time.perf_counter() - start_time
+
+    return {
+        "username": username,
+        "status": "ENROLLED",
+        "profile": saved_path,
+        "embedding_dimensions": embedding.shape[-1],
+        "processing_time": round(processing_time, 4)
+    }
 
 # ============================================================
 # MAIN ENROLLMENT PROCESS
