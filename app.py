@@ -11,7 +11,10 @@ from authentication_engine import (
     authenticate_voice
 )
 
-from enrollment_engine import enroll_voice
+from enrollment_engine import (
+    enroll_voice,
+    enroll_voice_from_recordings
+)
 
 from database import (
     initialize_database,
@@ -275,6 +278,95 @@ async def enroll_user(
             os.remove(temp_path)
 
         await voice.close()
+
+# ============================================================
+# LIVE TWO-RECORDING ENROLLMENT API
+# ============================================================
+
+@app.post("/enroll-live")
+async def enroll_live_user(
+
+    username: str = Form(...),
+    voice1: UploadFile = File(...),
+    voice2: UploadFile = File(...)
+
+):
+
+    if verification_model is None:
+
+        raise HTTPException(
+            status_code=503,
+            detail="Speaker model is not loaded"
+        )
+
+    temp_paths = []
+
+    try:
+
+        # Save both recordings temporarily
+
+        for voice in [voice1, voice2]:
+
+            with tempfile.NamedTemporaryFile(
+                delete=False,
+                suffix=".wav"
+            ) as temp_file:
+
+                temp_paths.append(temp_file.name)
+
+                shutil.copyfileobj(
+                    voice.file,
+                    temp_file
+                )
+
+        # Enroll using both recordings
+
+        result = enroll_voice_from_recordings(
+            username,
+            temp_paths[0],
+            temp_paths[1],
+            verification_model
+        )
+
+        return result
+
+    except FileExistsError as e:
+
+        raise HTTPException(
+            status_code=409,
+            detail=str(e)
+        )
+
+    except FileNotFoundError as e:
+
+        raise HTTPException(
+            status_code=404,
+            detail=str(e)
+        )
+
+    except ValueError as e:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+    finally:
+
+        for path in temp_paths:
+
+            if os.path.exists(path):
+                os.remove(path)
+
+        await voice1.close()
+        await voice2.close()
 
 # ============================================================
 # DASHBOARD STATISTICS API

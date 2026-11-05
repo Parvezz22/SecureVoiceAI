@@ -1,146 +1,315 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Voice Enrollment | SecureVoiceAI</title>
 
-    <link rel="stylesheet" href="/static/style.css">
+<title>Voice Enrollment | SecureVoiceAI</title>
+
+<link rel="stylesheet" href="/static/style.css">
+
+
 </head>
 
 <body>
 
-    <!-- SIDEBAR -->
+<!-- SIDEBAR -->
 
-    <div class="sidebar">
+<div class="sidebar">
 
-        <h2 class="logo">SecureVoice<span>AI</span></h2>
+    <h2 class="logo">SecureVoice<span>AI</span></h2>
 
-        <nav>
-            <a href="/">Dashboard</a>
-            <a href="/enroll-page" class="active">Voice Enrollment</a>
-            <a href="/authenticate-page">Authentication</a>
-            <a href="/history-page">Authentication History</a>
-            <a href="/users-page">Registered Users</a>
-        </nav>
+    <nav>
+        <a href="/">Dashboard</a>
+        <a href="/enroll-page" class="active">Voice Enrollment</a>
+        <a href="/authenticate-page">Authentication</a>
+        <a href="/history-page">Authentication History</a>
+        <a href="/users-page">Registered Users</a>
+    </nav>
 
-        <div class="sidebar-footer">
-            AI-Powered Voice Security
+    <div class="sidebar-footer">
+        AI-Powered Voice Security
+    </div>
+
+</div>
+
+
+<!-- MAIN CONTENT -->
+
+<main class="main-content">
+
+    <!-- HEADER -->
+
+    <header class="topbar">
+
+        <div>
+            <h1>Voice Enrollment</h1>
+            <p>Create your secure AI-powered voice identity.</p>
         </div>
 
+        <div class="status-badge">
+            ● System Online
+        </div>
+
+    </header>
+
+
+    <!-- WELCOME SECTION -->
+
+    <section class="welcome-card">
+
+        <div>
+
+            <p class="eyebrow">AI VOICE BIOMETRICS</p>
+
+            <h2>Register Your Voice</h2>
+
+            <p>
+                Record two different voice samples.
+                Our ECAPA-TDNN AI model will analyze both recordings
+                and create your unique voice profile.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- USERNAME -->
+
+    <section class="action-card">
+
+        <div class="form-group">
+
+            <label for="username">Username</label>
+
+            <input
+                type="text"
+                id="username"
+                placeholder="Enter a unique username"
+                minlength="3"
+                maxlength="30"
+                pattern="[a-zA-Z0-9_-]+"
+                required
+            >
+
+            <small>
+                Use 3-30 letters, numbers, underscores or hyphens.
+            </small>
+
+        </div>
+
+    </section>
+
+
+    <!-- LIVE ENROLLMENT -->
+
+    <section class="action-card live-enrollment">
+
+        <p class="eyebrow">RECOMMENDED METHOD</p>
+
+        <h2>Live Voice Enrollment</h2>
+
+        <p class="recording-intro">
+            Complete both recording steps using your microphone.
+            Speak naturally and clearly in a quiet environment.
+            Aim for 10-15 seconds per recording.
+        </p>
+
+
+        <!-- PROGRESS -->
+
+        <div class="recording-progress">
+
+            <div class="progress-segment" id="progress1"></div>
+
+            <div class="progress-segment" id="progress2"></div>
+
+        </div>
+
+
+        <!-- RECORDING 1 -->
+
+        <div class="recording-step">
+
+            <h3>
+                <span class="step-number">01</span>
+                First Voice Sample
+            </h3>
+
+            <p class="prompt-text">
+                "Hello, my name is [your name].
+                I am registering my voice with SecureVoiceAI.
+                This is my personal voice identity."
+            </p>
+
+            <div class="recording-controls">
+
+                <button
+                    type="button"
+                    class="record-btn"
+                    id="recordBtn1"
+                >
+                    ● Start Recording
+                </button>
+
+                <span class="recording-timer" id="timer1">
+                    00:00
+                </span>
+
+            </div>
+
+            <p class="recording-status" id="status1">
+                Waiting for your first recording.
+            </p>
+
+            <div class="audio-preview" id="preview1">
+
+                <audio id="audio1" controls></audio>
+
+                <button
+                    type="button"
+                    class="record-btn"
+                    id="retakeBtn1"
+                >
+                    Retake Recording
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- RECORDING 2 -->
+
+        <div class="recording-step">
+
+            <h3>
+                <span class="step-number">02</span>
+                Second Voice Sample
+            </h3>
+
+            <p class="prompt-text">
+                "Voice recognition helps protect digital identities.
+                SecureVoiceAI uses artificial intelligence
+                to recognize the unique characteristics of my voice."
+            </p>
+
+            <div class="recording-controls">
+
+                <button
+                    type="button"
+                    class="record-btn"
+                    id="recordBtn2"
+                    disabled
+                >
+                    ● Start Recording
+                </button>
+
+                <span class="recording-timer" id="timer2">
+                    00:00
+                </span>
+
+            </div>
+
+            <p class="recording-status" id="status2">
+                Complete the first recording to unlock this step.
+            </p>
+
+            <div class="audio-preview" id="preview2">
+
+                <audio id="audio2" controls></audio>
+
+                <button
+                    type="button"
+                    class="record-btn"
+                    id="retakeBtn2"
+                >
+                    Retake Recording
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- FINAL ENROLLMENT -->
+
+        <button
+            type="button"
+            class="btn live-enroll-submit"
+            id="liveEnrollBtn"
+            disabled
+        >
+            Complete Voice Enrollment
+        </button>
+
+        <div id="liveResult" class="result-box"></div>
+
+    </section>
+
+
+    <!-- UPLOAD OPTION -->
+
+    <div class="upload-divider">
+        OR USE EXISTING UPLOAD METHOD
     </div>
 
 
-    <!-- MAIN CONTENT -->
+    <section class="action-card">
 
-    <main class="main-content">
+        <h2>Upload Voice Recording</h2>
 
-        <!-- HEADER -->
+        <p class="recording-intro">
+            You can also register using an existing audio file.
+        </p>
 
-        <header class="topbar">
+        <form id="enrollmentForm">
 
-            <div>
-                <h1>Voice Enrollment</h1>
-                <p>Register a new user using their unique voice.</p>
-            </div>
+            <div class="form-group">
 
-            <div class="status-badge">
-                ● System Online
-            </div>
+                <label for="voice">Select Voice Recording</label>
 
-        </header>
+                <input
+                    type="file"
+                    id="voice"
+                    name="voice"
+                    accept=".wav,.mp3,.flac,.ogg"
+                    required
+                >
 
-
-        <!-- WELCOME SECTION -->
-
-        <section class="welcome-card">
-
-            <div>
-
-                <p class="eyebrow">NEW USER REGISTRATION</p>
-
-                <h2>Register Your Voice</h2>
-
-                <p>
-                    Upload a clear voice recording. Our ECAPA-TDNN
-                    AI model will generate a unique voice embedding
-                    and securely save your voice profile.
-                </p>
+                <small>
+                    Supported formats: WAV, MP3, FLAC and OGG.
+                </small>
 
             </div>
 
-        </section>
+            <button type="submit" class="btn">
+                Enroll Using Upload
+            </button>
+
+        </form>
+
+        <div id="result" class="result-box"></div>
+
+    </section>
 
 
-        <!-- ENROLLMENT FORM -->
+    <!-- FOOTER -->
 
-        <section class="action-card">
+    <footer>
+        SecureVoiceAI © 2026 | Voice Enrollment
+    </footer>
 
-            <form id="enrollmentForm">
-
-                <div class="form-group">
-
-                    <label for="username">Username</label>
-
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        placeholder="Enter username"
-                        minlength="3"
-                        maxlength="30"
-                        pattern="[a-zA-Z0-9_-]+"
-                        required
-                    >
-
-                </div>
+</main>
 
 
-                <div class="form-group">
+<!-- JAVASCRIPT -->
 
-                    <label for="voice">Voice Recording</label>
-
-                    <input
-                        type="file"
-                        id="voice"
-                        name="voice"
-                        accept=".wav,.mp3,.flac,.ogg"
-                        required
-                    >
-
-                    <small>
-                        Upload a clear voice recording.
-                    </small>
-
-                </div>
-
-
-                <button type="submit" class="btn">
-                    Enroll Voice
-                </button>
-
-            </form>
-
-
-            <div id="result" class="result-box"></div>
-
-        </section>
-
-
-        <!-- FOOTER -->
-
-        <footer>
-            SecureVoiceAI © 2026 | Voice Enrollment
-        </footer>
-
-    </main>
-
-
-    <!-- JAVASCRIPT -->
-
-    <script src="/static/enroll.js"></script>
+<script src="/static/enroll.js"></script>
 
 </body>
 

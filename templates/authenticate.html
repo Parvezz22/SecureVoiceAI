@@ -64,8 +64,9 @@
                 <h2>Verify Your Identity</h2>
 
                 <p>
-                    Authenticate your identity using your
-                    previously enrolled voice profile.
+                    Record your voice directly through your microphone.
+                    Our ECAPA-TDNN AI model will compare it against
+                    your registered voice profile.
                 </p>
 
             </div>
@@ -73,33 +74,164 @@
         </section>
 
 
-        <!-- AUTHENTICATION FORM -->
+        <!-- USERNAME -->
 
         <section class="action-card">
 
-            <h2>Authenticate with Voice</h2>
+            <div class="form-group">
+
+                <label for="username">Username</label>
+
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Enter your enrolled username"
+                    minlength="3"
+                    maxlength="30"
+                    required
+                >
+
+            </div>
+
+        </section>
+
+
+        <!-- LIVE AUTHENTICATION -->
+
+        <section class="action-card live-enrollment">
+
+            <p class="eyebrow">RECOMMENDED METHOD</p>
+
+            <h2>Live Voice Authentication</h2>
+
+            <p class="recording-intro">
+
+                Record a fresh voice sample using your microphone.
+                Speak naturally and clearly for approximately
+                10-15 seconds.
+
+            </p>
+
+
+            <!-- RECORDING -->
+
+            <div class="recording-step">
+
+                <h3>
+                    <span class="step-number">01</span>
+                    Voice Verification Sample
+                </h3>
+
+                <p class="prompt-text">
+
+                    "Hello, I am verifying my identity using
+                    SecureVoiceAI. Voice recognition technology
+                    helps protect my digital identity."
+
+                </p>
+
+
+                <div class="recording-controls">
+
+                    <button
+                        type="button"
+                        class="record-btn"
+                        id="recordBtn"
+                    >
+                        ● Start Recording
+                    </button>
+
+                    <span
+                        class="recording-timer"
+                        id="recordingTimer"
+                    >
+                        00:00
+                    </span>
+
+                </div>
+
+
+                <p
+                    class="recording-status"
+                    id="recordingStatus"
+                >
+                    Waiting for your voice recording.
+                </p>
+
+
+                <div
+                    class="audio-preview"
+                    id="audioPreview"
+                >
+
+                    <audio
+                        id="recordedAudio"
+                        controls
+                    ></audio>
+
+                    <button
+                        type="button"
+                        class="record-btn"
+                        id="retakeBtn"
+                    >
+                        Retake Recording
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- AUTHENTICATE BUTTON -->
+
+            <button
+                type="button"
+                class="btn live-enroll-submit"
+                id="liveAuthenticateBtn"
+                disabled
+            >
+                Authenticate My Voice
+            </button>
+
+
+            <div
+                id="liveResult"
+                class="result-box"
+            ></div>
+
+        </section>
+
+
+        <!-- UPLOAD DIVIDER -->
+
+        <div class="upload-divider">
+
+            OR USE EXISTING UPLOAD METHOD
+
+        </div>
+
+
+        <!-- FILE UPLOAD -->
+
+        <section class="action-card">
+
+            <h2>Upload Voice Recording</h2>
+
+            <p class="recording-intro">
+
+                Alternatively, authenticate using an existing
+                audio recording.
+
+            </p>
+
 
             <form id="authenticationForm">
 
                 <div class="form-group">
 
-                    <label for="username">Username</label>
-
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        placeholder="Enter your enrolled username"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
                     <label for="voice">
-                        Upload New Voice Recording
+                        Select Voice Recording
                     </label>
 
                     <input
@@ -111,20 +243,23 @@
                     >
 
                     <small>
-                        Upload a new recording of the enrolled user's voice.
+                        Supported formats: WAV, MP3, FLAC and OGG.
                     </small>
 
                 </div>
 
 
                 <button type="submit" class="btn">
-                    Authenticate Voice
+                    Authenticate Using Upload
                 </button>
 
             </form>
 
 
-            <div id="result" class="result-box"></div>
+            <div
+                id="result"
+                class="result-box"
+            ></div>
 
         </section>
 
@@ -132,7 +267,9 @@
         <!-- FOOTER -->
 
         <footer>
+
             SecureVoiceAI © 2026 | Voice Authentication
+
         </footer>
 
     </main>

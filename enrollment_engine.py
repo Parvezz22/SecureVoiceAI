@@ -251,6 +251,176 @@ def enroll_voice(username, voice_path, verification):
         "processing_time": round(processing_time, 4)
     }
 
+# ============================================================
+# TWO-RECORDING LIVE ENROLLMENT
+# ============================================================
+
+def enroll_voice_from_recordings(
+    username,
+    voice_path1,
+    voice_path2,
+    verification
+):
+
+    import re
+    import time
+
+    start_time = time.perf_counter()
+
+    # --------------------------------------------------------
+    # VALIDATE USERNAME
+    # --------------------------------------------------------
+
+    if not re.fullmatch(
+        r"[a-zA-Z0-9_-]{3,30}",
+        username
+    ):
+
+        raise ValueError(
+            "Username must be 3-30 characters and contain "
+            "only letters, numbers, underscores or hyphens."
+        )
+
+    # --------------------------------------------------------
+    # VALIDATE RECORDING FILES
+    # --------------------------------------------------------
+
+    for path in [voice_path1, voice_path2]:
+
+        if not os.path.exists(path):
+
+            raise FileNotFoundError(
+                f"Recording not found: {path}"
+            )
+
+    # --------------------------------------------------------
+    # PREVENT DUPLICATE ENROLLMENT
+    # --------------------------------------------------------
+
+    profile_path = os.path.join(
+        PROFILE_DIRECTORY,
+        f"{username}_voice.pt"
+    )
+
+    if os.path.exists(profile_path):
+
+        raise FileExistsError(
+            f"User '{username}' is already enrolled."
+        )
+
+    # --------------------------------------------------------
+    # PREPARE FIRST RECORDING
+    # --------------------------------------------------------
+
+    print("\nPreparing first voice recording...")
+
+    audio1 = prepare_audio(voice_path1)
+
+    duration1 = audio1.shape[-1] / TARGET_SAMPLE_RATE
+
+    if duration1 < 5 or duration1 > 30:
+
+        raise ValueError(
+            "First recording must be between 5 and 30 seconds."
+        )
+
+    # --------------------------------------------------------
+    # PREPARE SECOND RECORDING
+    # --------------------------------------------------------
+
+    print("\nPreparing second voice recording...")
+
+    audio2 = prepare_audio(voice_path2)
+
+    duration2 = audio2.shape[-1] / TARGET_SAMPLE_RATE
+
+    if duration2 < 5 or duration2 > 30:
+
+        raise ValueError(
+            "Second recording must be between 5 and 30 seconds."
+        )
+
+    # --------------------------------------------------------
+    # GENERATE FIRST EMBEDDING
+    # --------------------------------------------------------
+
+    print("\nGenerating first voice embedding...")
+
+    embedding1 = generate_embedding(
+        verification,
+        audio1
+    )
+
+    # --------------------------------------------------------
+    # GENERATE SECOND EMBEDDING
+    # --------------------------------------------------------
+
+    print("\nGenerating second voice embedding...")
+
+    embedding2 = generate_embedding(
+        verification,
+        audio2
+    )
+
+    # --------------------------------------------------------
+    # COMBINE EMBEDDINGS
+    # --------------------------------------------------------
+
+    print("\nCombining voice embeddings...")
+
+    if embedding1.shape != embedding2.shape:
+
+        raise RuntimeError(
+            "The two voice embeddings have different shapes."
+        )
+
+    combined_embedding = (
+        embedding1 + embedding2
+    ) / 2
+
+    # Normalize combined embedding
+    combined_embedding = torch.nn.functional.normalize(
+        combined_embedding,
+        p=2,
+        dim=-1
+    )
+
+    # --------------------------------------------------------
+    # SAVE COMBINED VOICE PROFILE
+    # --------------------------------------------------------
+
+    saved_path = save_profile(
+        combined_embedding,
+        username
+    )
+
+    # --------------------------------------------------------
+    # REGISTER USER IN DATABASE
+    # --------------------------------------------------------
+
+    register_enrolled_user(
+        username,
+        saved_path
+    )
+
+    processing_time = (
+        time.perf_counter() - start_time
+    )
+
+    print("\nTwo-recording enrollment completed!")
+
+    return {
+        "username": username,
+        "status": "ENROLLED",
+        "profile": saved_path,
+        "embedding_dimensions": combined_embedding.shape[-1],
+        "recordings_used": 2,
+        "recording_durations": [
+            round(duration1, 2),
+            round(duration2, 2)
+        ],
+        "processing_time": round(processing_time, 4)
+    }
 
 # ============================================================
 # MAIN ENROLLMENT PROCESS

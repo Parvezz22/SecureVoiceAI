@@ -505,3 +505,184 @@ tr:hover {
     }
 }
 
+/* ============================================================
+   LIVE VOICE ENROLLMENT
+   ============================================================ */
+
+.live-enrollment {
+    margin-top: 25px;
+}
+
+.recording-intro {
+    color: #9ba9c5;
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 22px;
+}
+
+.recording-step {
+    background: #151f35;
+    border: 1px solid #34435f;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+.recording-step h3 {
+    color: #ffffff;
+    margin-bottom: 10px;
+    font-size: 17px;
+}
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #123c4a;
+    color: #39d9e6;
+    margin-right: 9px;
+    font-weight: 700;
+}
+
+.prompt-text {
+    background: #101a2e;
+    border-left: 3px solid #26c6da;
+    padding: 16px;
+    border-radius: 6px;
+    color: #dce8f5;
+    line-height: 1.7;
+    margin: 18px 0;
+}
+
+.recording-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.record-btn {
+    background: linear-gradient(135deg, #087f91, #16b8c8);
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.record-btn:hover {
+    box-shadow: 0 0 18px rgba(22, 184, 200, 0.35);
+    transform: translateY(-2px);
+}
+
+.record-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.record-btn.recording {
+    background: #d94361;
+    animation: recordingPulse 1.2s infinite;
+}
+
+@keyframes recordingPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(217, 67, 97, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 9px rgba(217, 67, 97, 0);
+    }
+}
+
+.recording-timer {
+    color: #39d9e6;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.recording-status {
+    color: #9ba9c5;
+    font-size: 12px;
+    margin-top: 14px;
+}
+
+.audio-preview {
+    display: none;
+    width: 100%;
+    margin-top: 18px;
+}
+
+.audio-preview audio {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.recording-progress {
+    display: flex;
+    gap: 8px;
+    margin: 20px 0;
+}
+
+.progress-segment {
+    height: 5px;
+    flex: 1;
+    border-radius: 10px;
+    background: #35415c;
+}
+
+.progress-segment.completed {
+    background: #26c6da;
+    box-shadow: 0 0 8px rgba(38, 198, 218, 0.5);
+}
+
+.live-enroll-submit {
+    width: 100%;
+    margin-top: 15px;
+    background: linear-gradient(135deg, #087f91, #16b8c8);
+}
+
+.live-enroll-submit:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.upload-divider {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 30px 0;
+    color: #8997b2;
+    font-size: 12px;
+}
+
+.upload-divider::before,
+.upload-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #35415c;
+}
+
+@media (max-width: 650px) {
+    .recording-step {
+        padding: 17px;
+    }
+
+    .recording-controls {
+        align-items: stretch;
+    }
+
+    .record-btn {
+        width: 100%;
+    }
+}
+
