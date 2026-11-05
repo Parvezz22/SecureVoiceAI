@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SecureVoiceAI | Registered Users</title>
+
+<link rel="stylesheet" href="/static/style.css">
+
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h2 class="logo">SecureVoice<span>AI</span></h2>
+
+<nav>
+    <a href="/">Dashboard</a>
+    <a href="/enroll-page">Voice Enrollment</a>
+    <a href="/authenticate-page">Authentication</a>
+    <a href="/history-page">History</a>
+    <a href="/users-page" class="active">Registered Users</a>
+</nav>
+
+<div class="sidebar-footer">
+    AI-Powered Voice Security
+</div>
+
+</div>
+
+<main class="main-content">
+
+<header class="topbar">
+
+    <div>
+        <h1>User Management</h1>
+        <p>Manage and monitor registered voice identities.</p>
+    </div>
+
+    <div class="status-badge">
+        ● System Online
+    </div>
+
+</header>
+
+
+<section class="stats-grid">
+
+    <div class="stat-card">
+
+        <p>Total Registered Users</p>
+
+        <h2 id="totalUsers">--</h2>
+
+        <span>Enrolled voice identities</span>
+
+    </div>
+
+    <div class="stat-card">
+
+        <p>Registration System</p>
+
+        <h2>ACTIVE</h2>
+
+        <span>Voice enrollment available</span>
+
+    </div>
+
+    <div class="stat-card">
+
+        <p>Biometric Model</p>
+
+        <h2>ECAPA-TDNN</h2>
+
+        <span>192-dimensional embeddings</span>
+
+    </div>
+
+</section>
+
+
+<section class="table-container">
+
+    <div class="users-heading">
+
+        <div>
+            <h2>Registered Users</h2>
+
+            <p class="table-info" id="userCount">
+                Loading registered users...
+            </p>
+        </div>
+
+        <button class="btn" id="refreshUsers">
+            Refresh Users
+        </button>
+
+    </div>
+
+
+    <div class="filter-section">
+
+        <input
+            type="text"
+            id="searchUser"
+            placeholder="Search registered username..."
+        >
+
+    </div>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>USER ID</th>
+                <th>USERNAME</th>
+                <th>ENROLLMENT DATE</th>
+                <th>STATUS</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="usersTable">
+
+            <tr>
+                <td colspan="4" class="empty-message">
+                    Loading users...
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</section>
+
+
+<footer>
+    SecureVoiceAI © 2026 | AI-Powered Voice Authentication
+</footer>
+
+</main>
+
+<script>
+
+const usersTable = document.getElementById("usersTable");
+const totalUsers = document.getElementById("totalUsers");
+const userCount = document.getElementById("userCount");
+const searchUser = document.getElementById("searchUser");
+
+let registeredUsers = [];
+
+
+async function loadUsers() {
+
+    usersTable.innerHTML = "";
+
+    const loadingRow = document.createElement("tr");
+    const loadingCell = document.createElement("td");
+
+    loadingCell.colSpan = 4;
+    loadingCell.className = "empty-message";
+    loadingCell.textContent = "Loading users...";
+
+    loadingRow.appendChild(loadingCell);
+    usersTable.appendChild(loadingRow);
+
+    try {
+
+        const response = await fetch("/users");
+
+        if (!response.ok) {
+            throw new Error("Unable to fetch registered users.");
+        }
+
+        const data = await response.json();
+
+        registeredUsers = data.users;
+
+        totalUsers.textContent = data.total_users;
+
+        displayUsers();
+
+    }
+
+    catch (error) {
+
+        usersTable.innerHTML = "";
+
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+
+        cell.colSpan = 4;
+        cell.className = "empty-message";
+        cell.textContent = error.message;
+
+        row.appendChild(cell);
+        usersTable.appendChild(row);
+
+        totalUsers.textContent = "--";
+        userCount.textContent = "Unable to load users.";
+
+    }
+
+}
+
+
+function displayUsers() {
+
+    usersTable.innerHTML = "";
+
+    const search = searchUser.value.trim().toLowerCase();
+
+    const filteredUsers = registeredUsers.filter(user =>
+        user.username.toLowerCase().includes(search)
+    );
+
+    userCount.textContent =
+        `Showing ${filteredUsers.length} of ${registeredUsers.length} registered users`;
+
+    if (filteredUsers.length === 0) {
+
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+
+        cell.colSpan = 4;
+        cell.className = "empty-message";
+        cell.textContent = "No registered users found.";
+
+        row.appendChild(cell);
+        usersTable.appendChild(row);
+
+        return;
+
+    }
+
+
+    filteredUsers.forEach(user => {
+
+        const row = document.createElement("tr");
+
+        const idCell = document.createElement("td");
+        idCell.textContent = user.id;
+
+        const usernameCell = document.createElement("td");
+        usernameCell.textContent = user.username;
+
+        const dateCell = document.createElement("td");
+
+        const date = new Date(user.enrolled_at);
+
+        dateCell.textContent = isNaN(date.getTime())
+            ? user.enrolled_at
+            : date.toLocaleString();
+
+        const statusCell = document.createElement("td");
+
+        const badge = document.createElement("span");
+
+        badge.className = "user-status";
+        badge.textContent = "ENROLLED";
+
+        statusCell.appendChild(badge);
+
+        row.appendChild(idCell);
+        row.appendChild(usernameCell);
+        row.appendChild(dateCell);
+        row.appendChild(statusCell);
+
+        usersTable.appendChild(row);
+
+    });
+
+}
+
+
+// Search users
+searchUser.addEventListener("input", displayUsers);
+
+
+// Refresh users
+document.getElementById("refreshUsers")
+    .addEventListener("click", loadUsers);
+
+
+// Load users when page opens
+loadUsers();
+
+</script>
+
+</body>
+</html>

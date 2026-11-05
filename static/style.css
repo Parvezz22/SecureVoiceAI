@@ -379,3 +379,129 @@ color: #ff9db2;
 margin-bottom: 12px;
 }
 
+/* =====================================
+   DAY 4 - TABLES AND FILTERS
+===================================== */
+
+.table-container {
+    background: #141d32;
+    border: 1px solid #27334d;
+    border-radius: 14px;
+    padding: 25px;
+    margin-top: 25px;
+    overflow-x: auto;
+}
+
+.table-container h2 {
+    font-size: 20px;
+    margin-bottom: 22px;
+}
+
+.filter-section {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.filter-section input,
+.filter-section select {
+    background: #0b1020;
+    border: 1px solid #35415c;
+    padding: 12px 15px;
+    border-radius: 8px;
+    color: white;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.filter-section input:focus,
+.filter-section select:focus {
+    border-color: #8b7cff;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 750px;
+}
+
+th {
+    text-align: left;
+    color: #a99cff;
+    font-size: 12px;
+    padding: 16px 12px;
+    border-bottom: 1px solid #35415c;
+}
+
+td {
+    padding: 16px 12px;
+    font-size: 12px;
+    color: #c1c5dd;
+    border-bottom: 1px solid #27334d;
+}
+
+tr:hover {
+    background: #1b2740;
+}
+
+.status-success {
+    color: #4adea5;
+    font-weight: 700;
+}
+
+.status-failed {
+    color: #ff8199;
+    font-weight: 700;
+}
+
+.table-info {
+    color: #8e9ab5;
+    font-size: 12px;
+    margin-bottom: 15px;
+}
+
+.empty-message {
+    color: #8e9ab5;
+    text-align: center;
+    padding: 30px;
+}
+
+/* USER MANAGEMENT PAGE */
+
+.users-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.user-status {
+    display: inline-block;
+    background: #12372f;
+    color: #4adea5;
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+#searchUser {
+    min-width: 280px;
+}
+
+@media (max-width: 650px) {
+    .users-heading {
+        align-items: flex-start;
+    }
+
+    #searchUser {
+        width: 100%;
+        min-width: 0;
+    }
+}
+

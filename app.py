@@ -16,9 +16,10 @@ from enrollment_engine import enroll_voice
 from database import (
     initialize_database,
     log_authentication,
-    get_dashboard_stats
+    get_dashboard_stats,
+    get_authentication_history,
+    get_all_users
 )
-
 
 # ============================================================
 # INITIALIZE FASTAPI
@@ -67,6 +68,14 @@ def load_speaker_model():
 def home():
 
     return FileResponse("templates/index.html")
+
+@app.get("/history-page")
+def history_page():
+    return FileResponse("templates/history.html")
+
+@app.get("/users-page")
+def users_page():
+    return FileResponse("templates/users.html")
 
 
 # ============================================================
@@ -286,3 +295,50 @@ def dashboard_stats():
             status_code=500,
             detail=str(e)
         )
+# GET COMPLETE AUTHENTICATION HISTORY
+
+@app.get("/authentication-history")
+def authentication_history(
+    username: str = None,
+    status: str = None
+):
+
+    try:
+        if status and status.upper() not in ["SUCCESS", "FAILED"]:
+            raise HTTPException(
+                status_code=400,
+                detail="Status must be SUCCESS or FAILED"
+            )
+
+        history = get_authentication_history(
+            username=username,
+            status=status
+        )
+
+        return {
+            "total_records": len(history),
+            "history": history
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# GET ALL REGISTERED USERS
+
+@app.get("/users")
+def registered_users():
+
+    try:
+        users = get_all_users()
+
+        return {
+            "total_users": len(users),
+            "users": users
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

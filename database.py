@@ -152,7 +152,62 @@ def get_dashboard_stats():
     finally:
         connection.close()
 
+# GET AUTHENTICATION HISTORY
 
+def get_authentication_history(username=None, status=None):
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        query = """
+            SELECT *
+            FROM authentication_logs
+            WHERE 1=1
+        """
+
+        parameters = []
+
+        # Filter by username
+        if username:
+            query += " AND username LIKE ?"
+            parameters.append(f"%{username}%")
+
+        # Filter by authentication status
+        if status:
+            query += " AND authentication = ?"
+            parameters.append(status.upper())
+
+        query += " ORDER BY id DESC"
+
+        records = cursor.execute(
+            query, parameters
+        ).fetchall()
+
+        return [dict(row) for row in records]
+
+    finally:
+        connection.close()
+
+
+# GET ALL REGISTERED USERS
+
+def get_all_users():
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        users = cursor.execute("""
+            SELECT *
+            FROM users
+            ORDER BY id DESC
+        """).fetchall()
+
+        return [dict(row) for row in users]
+
+    finally:
+        connection.close()
 # MAIN
 
 if __name__ == "__main__":

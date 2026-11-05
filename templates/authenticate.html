@@ -1,85 +1,147 @@
 <!DOCTYPE html>
-
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Voice Authentication | SecureVoiceAI</title>
+
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
 
-<div class="dashboard">
+    <!-- SIDEBAR -->
 
-```
-<aside class="sidebar">
-    <div class="logo">SecureVoiceAI</div>
+    <div class="sidebar">
 
-    <nav>
-        <a href="/">Dashboard</a>
-        <a href="/enroll-page">Voice Enrollment</a>
-        <a href="/authenticate-page" class="active">Authentication</a>
-    </nav>
-</aside>
+        <h2 class="logo">SecureVoice<span>AI</span></h2>
 
-<main class="main-content">
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/enroll-page">Voice Enrollment</a>
+            <a href="/authenticate-page" class="active">Authentication</a>
+            <a href="/history-page">Authentication History</a>
+            <a href="/users-page">Registered Users</a>
+        </nav>
 
-    <header class="topbar">
-        <h2>Voice Authentication</h2>
-        <span class="status">System Online</span>
-    </header>
+        <div class="sidebar-footer">
+            AI-Powered Voice Security
+        </div>
 
-    <section class="welcome-card">
-        <h1>Verify Your Identity</h1>
-        <p>Authenticate your identity using your enrolled voice profile.</p>
-    </section>
+    </div>
 
-    <section class="form-card">
 
-        <h2>Authenticate with Voice</h2>
+    <!-- MAIN CONTENT -->
 
-        <form id="authenticationForm">
+    <main class="main-content">
 
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    placeholder="Enter your enrolled username"
-                    required
-                >
+        <!-- HEADER -->
+
+        <header class="topbar">
+
+            <div>
+                <h1>Voice Authentication</h1>
+                <p>Verify your identity using your enrolled voice.</p>
             </div>
 
-            <div class="form-group">
-                <label for="voice">Upload New Voice Recording</label>
-                <input
-                    type="file"
-                    id="voice"
-                    name="voice"
-                    accept=".wav,.mp3,.flac,.ogg"
-                    required
-                >
-                <small>Upload a new recording of the enrolled user's voice.</small>
+            <div class="status-badge">
+                ● System Online
             </div>
 
-            <button type="submit" class="btn">
-                Authenticate Voice
-            </button>
+        </header>
 
-        </form>
 
-        <div id="result" class="result-box"></div>
+        <!-- WELCOME SECTION -->
 
-    </section>
+        <section class="welcome-card">
 
-</main>
-```
+            <div>
 
-</div>
+                <p class="eyebrow">VOICE IDENTITY VERIFICATION</p>
 
-<script src="/static/authenticate.js"></script>
+                <h2>Verify Your Identity</h2>
+
+                <p>
+                    Authenticate your identity using your
+                    previously enrolled voice profile.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- AUTHENTICATION FORM -->
+
+        <section class="action-card">
+
+            <h2>Authenticate with Voice</h2>
+
+            <form id="authenticationForm">
+
+                <div class="form-group">
+
+                    <label for="username">Username</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Enter your enrolled username"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="voice">
+                        Upload New Voice Recording
+                    </label>
+
+                    <input
+                        type="file"
+                        id="voice"
+                        name="voice"
+                        accept=".wav,.mp3,.flac,.ogg"
+                        required
+                    >
+
+                    <small>
+                        Upload a new recording of the enrolled user's voice.
+                    </small>
+
+                </div>
+
+
+                <button type="submit" class="btn">
+                    Authenticate Voice
+                </button>
+
+            </form>
+
+
+            <div id="result" class="result-box"></div>
+
+        </section>
+
+
+        <!-- FOOTER -->
+
+        <footer>
+            SecureVoiceAI © 2026 | Voice Authentication
+        </footer>
+
+    </main>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script src="/static/authenticate.js"></script>
 
 </body>
+
 </html>

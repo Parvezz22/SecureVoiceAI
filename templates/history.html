@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SecureVoiceAI | Authentication History</title>
+
+<link rel="stylesheet" href="/static/style.css">
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h2 class="logo">SecureVoice<span>AI</span></h2>
+
+<nav>
+    <a href="/">Dashboard</a>
+    <a href="/enroll-page">Voice Enrollment</a>
+    <a href="/authenticate-page">Authentication</a>
+    <a href="/history-page" class="active">History</a>
+    <a href="/users-page">Registered Users</a>
+</nav>
+
+<div class="sidebar-footer">
+    AI-Powered Voice Security
+</div>
+
+</div>
+
+<main class="main-content">
+
+<header class="topbar">
+
+    <div>
+        <h1>Authentication History</h1>
+        <p>Monitor and review voice authentication attempts.</p>
+    </div>
+
+    <div class="status-badge">
+        ● System Online
+    </div>
+
+</header>
+
+
+<section class="table-container">
+
+    <h2>Authentication Records</h2>
+
+    <p class="table-info" id="recordCount">
+        Loading records...
+    </p>
+
+
+    <div class="filter-section">
+
+        <input
+            type="text"
+            id="usernameFilter"
+            placeholder="Search username..."
+        >
+
+        <select id="statusFilter">
+
+            <option value="">All Results</option>
+
+            <option value="SUCCESS">Successful</option>
+
+            <option value="FAILED">Failed</option>
+
+        </select>
+
+        <button class="btn" id="refreshButton">
+            Refresh
+        </button>
+
+    </div>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Username</th>
+                <th>Result</th>
+                <th>Similarity Score</th>
+                <th>Threshold</th>
+                <th>Confidence</th>
+                <th>Processing Time</th>
+                <th>Timestamp</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="historyTable">
+
+            <tr>
+                <td colspan="7" class="empty-message">
+                    Loading authentication history...
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</section>
+
+
+<footer>
+    SecureVoiceAI © 2026 | AI-Powered Voice Authentication
+</footer>
+
+</main>
+
+<script>
+
+const usernameFilter = document.getElementById("usernameFilter");
+const statusFilter = document.getElementById("statusFilter");
+const historyTable = document.getElementById("historyTable");
+const recordCount = document.getElementById("recordCount");
+
+
+async function loadHistory() {
+
+    historyTable.innerHTML = "";
+
+    const loadingRow = document.createElement("tr");
+    const loadingCell = document.createElement("td");
+
+    loadingCell.colSpan = 7;
+    loadingCell.className = "empty-message";
+    loadingCell.textContent = "Loading records...";
+
+    loadingRow.appendChild(loadingCell);
+    historyTable.appendChild(loadingRow);
+
+    const username = usernameFilter.value.trim();
+    const status = statusFilter.value;
+
+    const params = new URLSearchParams();
+
+    if (username) {
+        params.append("username", username);
+    }
+
+    if (status) {
+        params.append("status", status);
+    }
+
+    try {
+
+        const response = await fetch(
+            `/authentication-history?${params.toString()}`
+        );
+
+        if (!response.ok) {
+            throw new Error("Unable to fetch authentication history.");
+        }
+
+        const data = await response.json();
+
+        historyTable.innerHTML = "";
+
+        recordCount.textContent =
+            `Total Records: ${data.total_records}`;
+
+        if (data.history.length === 0) {
+
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+
+            cell.colSpan = 7;
+            cell.className = "empty-message";
+            cell.textContent = "No authentication records found.";
+
+            row.appendChild(cell);
+            historyTable.appendChild(row);
+
+            return;
+        }
+
+
+        data.history.forEach(record => {
+
+            const row = document.createElement("tr");
+
+            const values = [
+                record.username,
+                record.authentication,
+                record.similarity_score ?? "-",
+                record.threshold ?? "-",
+                record.confidence ?? "-",
+                record.processing_time != null
+                    ? `${record.processing_time} sec`
+                    : "-",
+                record.timestamp
+            ];
+
+            values.forEach((value, index) => {
+
+                const cell = document.createElement("td");
+
+                cell.textContent = value;
+
+                if (index === 1) {
+
+                    cell.className =
+                        record.authentication === "SUCCESS"
+                            ? "status-success"
+                            : "status-failed";
+
+                }
+
+                row.appendChild(cell);
+
+            });
+
+            historyTable.appendChild(row);
+
+        });
+
+    }
+
+    catch (error) {
+
+        historyTable.innerHTML = "";
+
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+
+        cell.colSpan = 7;
+        cell.className = "empty-message";
+        cell.textContent = error.message;
+
+        row.appendChild(cell);
+        historyTable.appendChild(row);
+
+        recordCount.textContent = "Unable to load records.";
+
+    }
+
+}
+
+
+// Search username
+usernameFilter.addEventListener("input", loadHistory);
+
+
+// Filter authentication status
+statusFilter.addEventListener("change", loadHistory);
+
+
+// Refresh button
+document.getElementById("refreshButton")
+    .addEventListener("click", loadHistory);
+
+
+// Load records when page opens
+loadHistory();
+
+</script>
+
+</body>
+</html>

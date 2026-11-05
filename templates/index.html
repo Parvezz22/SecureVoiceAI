@@ -1,358 +1,377 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
-<title>SecureVoiceAI | Dashboard</title>
+    <title>SecureVoiceAI | Dashboard</title>
 
-<link rel="stylesheet" href="/static/style.css">
-```
-
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
 
-```
-<div class="sidebar">
+    <!-- SIDEBAR -->
 
-    <h2 class="logo">SecureVoice<span>AI</span></h2>
+    <div class="sidebar">
 
-    <nav>
-        <a href="/" class="active">Dashboard</a>
-        <a href="/enroll-page">Voice Enrollment</a>
-        <a href="/authenticate-page">Authentication</a>
-    </nav>
+        <h2 class="logo">SecureVoice<span>AI</span></h2>
 
-    <div class="sidebar-footer">
-        AI-Powered Voice Security
+        <nav>
+            <a href="/" class="active">Dashboard</a>
+            <a href="/enroll-page">Voice Enrollment</a>
+            <a href="/authenticate-page">Authentication</a>
+            <a href="/history-page">Authentication History</a>
+            <a href="/users-page">Registered Users</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            AI-Powered Voice Security
+        </div>
+
     </div>
 
-</div>
 
+    <!-- MAIN CONTENT -->
 
-<main class="main-content">
+    <main class="main-content">
 
-    <!-- HEADER -->
+        <!-- HEADER -->
 
-    <header class="topbar">
+        <header class="topbar">
 
-        <div>
-            <h1>Dashboard</h1>
-            <p>Welcome to your voice authentication system.</p>
-        </div>
-
-        <div class="status-badge">
-            ● System Online
-        </div>
-
-    </header>
-
-
-    <!-- WELCOME SECTION -->
-
-    <section class="welcome-card">
-
-        <div>
-
-            <p class="eyebrow">VOICE BIOMETRIC SECURITY</p>
-
-            <h2>Your Voice. Your Identity.</h2>
-
-            <p>
-                SecureVoiceAI uses advanced AI technology
-                to recognize and authenticate individuals
-                through their unique voice characteristics.
-            </p>
-
-        </div>
-
-    </section>
-
-
-    <!-- SYSTEM INFORMATION -->
-
-    <section class="stats-grid">
-
-        <div class="stat-card">
-            <p>AI Model</p>
-            <h2>ECAPA-TDNN</h2>
-            <span>Speaker Recognition</span>
-        </div>
-
-        <div class="stat-card">
-            <p>Embedding Size</p>
-            <h2>192</h2>
-            <span>Voice Features</span>
-        </div>
-
-        <div class="stat-card">
-            <p>Similarity Threshold</p>
-            <h2>0.60</h2>
-            <span>Authentication Score</span>
-        </div>
-
-    </section>
-
-
-    <!-- LIVE DATABASE STATISTICS -->
-
-    <section class="action-section">
-
-        <h2>System Statistics</h2>
-
-        <div class="stats-grid">
-
-            <div class="stat-card">
-                <p>Total Registered Users</p>
-                <h2 id="totalUsers">Loading...</h2>
-                <span>Enrolled users</span>
+            <div>
+                <h1>Dashboard</h1>
+                <p>Welcome to your voice authentication system.</p>
             </div>
 
-            <div class="stat-card">
-                <p>Total Authentication Attempts</p>
-                <h2 id="totalAttempts">Loading...</h2>
-                <span>All verification attempts</span>
+            <div class="status-badge">
+                ● System Online
             </div>
 
-            <div class="stat-card">
-                <p>Successful Attempts</p>
-                <h2 id="successfulAttempts">Loading...</h2>
-                <span>Verified identities</span>
-            </div>
-
-            <div class="stat-card">
-                <p>Failed Attempts</p>
-                <h2 id="failedAttempts">Loading...</h2>
-                <span>Unsuccessful verifications</span>
-            </div>
-
-        </div>
-
-    </section>
+        </header>
 
 
-    <!-- RECENT ACTIVITY -->
+        <!-- WELCOME SECTION -->
 
-    <section class="action-section">
+        <section class="welcome-card">
 
-        <h2>Recent Authentication Activity</h2>
+            <div>
 
-        <div class="action-card">
+                <p class="eyebrow">VOICE BIOMETRIC SECURITY</p>
 
-            <div id="recentActivity">
-
-                Loading recent activity...
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- VOICE OPERATIONS -->
-
-    <section class="action-section">
-
-        <h2>Voice Security Operations</h2>
-
-        <div class="action-grid">
-
-            <div class="action-card" id="enrollment">
-
-                <div class="card-icon">01</div>
-
-                <h3>Voice Enrollment</h3>
+                <h2>Your Voice. Your Identity.</h2>
 
                 <p>
-                    Register a new user by uploading
-                    their voice recording.
+                    SecureVoiceAI uses advanced AI technology
+                    to recognize and authenticate individuals
+                    through their unique voice characteristics.
                 </p>
 
-                <a href="/enroll-page" class="btn">
-                    Enroll User
+            </div>
+
+        </section>
+
+
+        <!-- SYSTEM INFORMATION -->
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <p>AI Model</p>
+                <h2>ECAPA-TDNN</h2>
+                <span>Speaker Recognition</span>
+            </div>
+
+            <div class="stat-card">
+                <p>Embedding Size</p>
+                <h2>192</h2>
+                <span>Voice Features</span>
+            </div>
+
+            <div class="stat-card">
+                <p>Similarity Threshold</p>
+                <h2>0.60</h2>
+                <span>Authentication Score</span>
+            </div>
+
+        </section>
+
+
+        <!-- LIVE DATABASE STATISTICS -->
+
+        <section class="action-section">
+
+            <h2>System Statistics</h2>
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <p>Total Registered Users</p>
+                    <h2 id="totalUsers">Loading...</h2>
+                    <span>Enrolled users</span>
+                </div>
+
+                <div class="stat-card">
+                    <p>Total Authentication Attempts</p>
+                    <h2 id="totalAttempts">Loading...</h2>
+                    <span>All verification attempts</span>
+                </div>
+
+                <div class="stat-card">
+                    <p>Successful Attempts</p>
+                    <h2 id="successfulAttempts">Loading...</h2>
+                    <span>Verified identities</span>
+                </div>
+
+                <div class="stat-card">
+                    <p>Failed Attempts</p>
+                    <h2 id="failedAttempts">Loading...</h2>
+                    <span>Unsuccessful verifications</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- RECENT ACTIVITY -->
+
+        <section class="action-section">
+
+            <h2>Recent Authentication Activity</h2>
+
+            <div class="action-card">
+
+                <div id="recentActivity">
+                    Loading recent activity...
+                </div>
+
+                <br>
+
+                <a href="/history-page" class="btn">
+                    View Complete History
                 </a>
 
             </div>
 
+        </section>
 
-            <div class="action-card" id="authentication">
 
-                <div class="card-icon">02</div>
+        <!-- VOICE OPERATIONS -->
 
-                <h3>Voice Authentication</h3>
+        <section class="action-section">
 
-                <p>
-                    Verify a registered user's identity
-                    using a new voice recording.
-                </p>
+            <h2>Voice Security Operations</h2>
 
-                <a href="/authenticate-page" class="btn">
-                    Authenticate
-                </a>
+            <div class="action-grid">
+
+                <div class="action-card">
+
+                    <div class="card-icon">01</div>
+
+                    <h3>Voice Enrollment</h3>
+
+                    <p>
+                        Register a new user by uploading
+                        their voice recording.
+                    </p>
+
+                    <a href="/enroll-page" class="btn">
+                        Enroll User
+                    </a>
+
+                </div>
+
+
+                <div class="action-card">
+
+                    <div class="card-icon">02</div>
+
+                    <h3>Voice Authentication</h3>
+
+                    <p>
+                        Verify a registered user's identity
+                        using a new voice recording.
+                    </p>
+
+                    <a href="/authenticate-page" class="btn">
+                        Authenticate
+                    </a>
+
+                </div>
 
             </div>
 
-        </div>
-
-    </section>
+        </section>
 
 
-    <!-- FOOTER -->
+        <!-- FOOTER -->
 
-    <footer>
-        SecureVoiceAI © 2026 | AI-Powered Voice Authentication
-    </footer>
+        <footer>
+            SecureVoiceAI © 2026 | AI-Powered Voice Authentication
+        </footer>
 
-</main>
-
-
-<!-- DASHBOARD JAVASCRIPT -->
-
-<script>
-
-    async function loadDashboardStats() {
-
-        const activityBox = document.getElementById(
-            "recentActivity"
-        );
-
-        try {
-
-            const response = await fetch("/dashboard-stats");
-
-            if (!response.ok) {
-                throw new Error("Unable to load dashboard statistics.");
-            }
-
-            const data = await response.json();
+    </main>
 
 
-            // UPDATE STATISTICS
+    <!-- DASHBOARD JAVASCRIPT -->
 
-            document.getElementById("totalUsers").textContent =
-                data.total_users;
+    <script>
 
-            document.getElementById("totalAttempts").textContent =
-                data.total_attempts;
+        async function loadDashboardStats() {
 
-            document.getElementById("successfulAttempts").textContent =
-                data.successful_attempts;
+            const activityBox = document.getElementById(
+                "recentActivity"
+            );
 
-            document.getElementById("failedAttempts").textContent =
-                data.failed_attempts;
+            try {
 
+                const response = await fetch("/dashboard-stats");
 
-            // UPDATE RECENT ACTIVITY
+                if (!response.ok) {
+                    throw new Error(
+                        "Unable to load dashboard statistics."
+                    );
+                }
 
-            if (data.recent_activity.length === 0) {
-
-                activityBox.textContent =
-                    "No authentication activity available.";
-
-                return;
-
-            }
+                const data = await response.json();
 
 
-            const table = document.createElement("table");
+                // UPDATE STATISTICS
 
-            table.style.width = "100%";
-            table.style.borderCollapse = "collapse";
+                document.getElementById("totalUsers").textContent =
+                    data.total_users;
 
-            const headers = [
-                "Username",
-                "Result",
-                "Similarity Score",
-                "Confidence",
-                "Date & Time"
-            ];
+                document.getElementById("totalAttempts").textContent =
+                    data.total_attempts;
 
-            const thead = document.createElement("thead");
-            const headerRow = document.createElement("tr");
+                document.getElementById("successfulAttempts").textContent =
+                    data.successful_attempts;
 
-            headers.forEach(function (header) {
-
-                const th = document.createElement("th");
-
-                th.textContent = header;
-                th.style.padding = "12px";
-                th.style.textAlign = "left";
-
-                headerRow.appendChild(th);
-
-            });
-
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
+                document.getElementById("failedAttempts").textContent =
+                    data.failed_attempts;
 
 
-            const tbody = document.createElement("tbody");
+                // UPDATE RECENT ACTIVITY
 
-            data.recent_activity.forEach(function (activity) {
+                if (!data.recent_activity ||
+                    data.recent_activity.length === 0) {
 
-                const row = document.createElement("tr");
+                    activityBox.textContent =
+                        "No authentication activity available.";
 
-                const values = [
-                    activity.username,
-                    activity.authentication,
-                    activity.similarity_score,
-                    activity.confidence,
-                    activity.timestamp.replace("T", " ")
+                    return;
+
+                }
+
+
+                // CREATE TABLE
+
+                const table = document.createElement("table");
+
+                table.style.width = "100%";
+                table.style.borderCollapse = "collapse";
+
+                const headers = [
+                    "Username",
+                    "Result",
+                    "Similarity Score",
+                    "Confidence",
+                    "Date & Time"
                 ];
 
-                values.forEach(function (value, index) {
 
-                    const td = document.createElement("td");
+                // TABLE HEADER
 
-                    td.textContent = value ?? "N/A";
-                    td.style.padding = "12px";
+                const thead = document.createElement("thead");
+                const headerRow = document.createElement("tr");
 
-                    if (index === 1) {
+                headers.forEach(function (header) {
 
-                        td.style.color =
-                            value === "SUCCESS" ? "#22c55e" : "#ef4444";
+                    const th = document.createElement("th");
 
-                    }
+                    th.textContent = header;
+                    th.style.padding = "12px";
+                    th.style.textAlign = "left";
 
-                    row.appendChild(td);
+                    headerRow.appendChild(th);
 
                 });
 
-                tbody.appendChild(row);
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
 
-            });
 
-            table.appendChild(tbody);
+                // TABLE BODY
 
-            activityBox.replaceChildren(table);
+                const tbody = document.createElement("tbody");
+
+                data.recent_activity.forEach(function (activity) {
+
+                    const row = document.createElement("tr");
+
+                    const values = [
+                        activity.username,
+                        activity.authentication,
+                        activity.similarity_score,
+                        activity.confidence,
+                        activity.timestamp
+                            ? activity.timestamp.replace("T", " ")
+                            : "N/A"
+                    ];
+
+                    values.forEach(function (value, index) {
+
+                        const td = document.createElement("td");
+
+                        td.textContent = value ?? "N/A";
+                        td.style.padding = "12px";
+
+                        if (index === 1) {
+
+                            td.style.color =
+                                value === "SUCCESS"
+                                    ? "#22c55e"
+                                    : "#ef4444";
+
+                        }
+
+                        row.appendChild(td);
+
+                    });
+
+                    tbody.appendChild(row);
+
+                });
+
+                table.appendChild(tbody);
+
+                activityBox.replaceChildren(table);
+
+            }
+
+            catch (error) {
+
+                console.error("Dashboard Error:", error);
+
+                activityBox.textContent =
+                    "Unable to load dashboard data. Please refresh the page.";
+
+            }
 
         }
 
-        catch (error) {
 
-            console.error("Dashboard Error:", error);
+        // LOAD DATA WHEN PAGE OPENS
 
-            activityBox.textContent =
-                "Unable to load dashboard data. Please refresh the page.";
+        document.addEventListener(
+            "DOMContentLoaded",
+            loadDashboardStats
+        );
 
-        }
-
-    }
-
-
-    // LOAD DATA WHEN PAGE OPENS
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        loadDashboardStats
-    );
-
-</script>
+    </script>
 
 </body>
 
