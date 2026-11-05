@@ -4,6 +4,8 @@ import torch
 import torchaudio
 import torchcodec
 
+from database import add_user
+
 
 # ============================================================
 # SECUREVOICE AI
@@ -26,9 +28,7 @@ def prepare_audio(voice_path):
 
     try:
 
-        audio, sample_rate = torchaudio.load(
-            voice_path
-        )
+        audio, sample_rate = torchaudio.load(voice_path)
 
     except Exception as e:
 
@@ -38,20 +38,12 @@ def prepare_audio(voice_path):
 
     print("Enrollment voice loaded successfully!")
 
-    print(
-        f"Original sample rate: {sample_rate} Hz"
-    )
+    print(f"Original sample rate: {sample_rate} Hz")
 
-    # --------------------------------------------------------
     # Convert stereo to mono
-    # --------------------------------------------------------
-
     if audio.shape[0] > 1:
 
-        print(
-            f"Converting {audio.shape[0]} "
-            "audio channels to mono..."
-        )
+        print("Converting audio to mono...")
 
         audio = torch.mean(
             audio,
@@ -61,16 +53,12 @@ def prepare_audio(voice_path):
 
         print("Mono conversion completed!")
 
-    # --------------------------------------------------------
-    # Resample
-    # --------------------------------------------------------
-
+    # Resample audio
     if sample_rate != TARGET_SAMPLE_RATE:
 
         print(
-            f"Resampling audio from "
-            f"{sample_rate} Hz to "
-            f"{TARGET_SAMPLE_RATE} Hz..."
+            f"Resampling audio from {sample_rate} Hz "
+            f"to {TARGET_SAMPLE_RATE} Hz..."
         )
 
         resampler = torchaudio.transforms.Resample(
@@ -84,10 +72,7 @@ def prepare_audio(voice_path):
 
         print("Resampling completed!")
 
-    # --------------------------------------------------------
-    # Validate
-    # --------------------------------------------------------
-
+    # Validate audio
     if audio.numel() == 0:
 
         raise RuntimeError(
@@ -96,13 +81,8 @@ def prepare_audio(voice_path):
 
     print("Audio prepared successfully!")
 
-    print(
-        f"Final sample rate: {sample_rate} Hz"
-    )
-
-    print(
-        f"Audio shape: {audio.shape}"
-    )
+    print(f"Final sample rate: {sample_rate} Hz")
+    print(f"Audio shape: {audio.shape}")
 
     return audio
 
@@ -114,9 +94,6 @@ def prepare_audio(voice_path):
 def load_model():
 
     print("\nLoading speaker recognition model...")
-
-    # Import SpeechBrain only after TorchCodec
-    # and Torchaudio have been initialized.
 
     from speechbrain.inference.speaker import (
         SpeakerRecognition
@@ -136,30 +113,18 @@ def load_model():
 # GENERATE VOICE EMBEDDING
 # ============================================================
 
-def generate_embedding(
-    verification,
-    audio
-):
+def generate_embedding(verification, audio):
 
     print("\nGenerating voice embedding...")
 
     with torch.no_grad():
 
-        embedding = verification.encode_batch(
-            audio
-        )
+        embedding = verification.encode_batch(audio)
 
-    print(
-        "Voice embedding generated successfully!"
-    )
+    print("Voice embedding generated successfully!")
 
-    print(
-        f"Embedding shape: {embedding.shape}"
-    )
-
-    print(
-        f"Embedding dtype: {embedding.dtype}"
-    )
+    print(f"Embedding shape: {embedding.shape}")
+    print(f"Embedding dtype: {embedding.dtype}")
 
     return embedding
 
@@ -168,32 +133,17 @@ def generate_embedding(
 # SAVE VOICE PROFILE
 # ============================================================
 
-def save_profile(
-    embedding,
-    username
-):
-
-    # --------------------------------------------------------
-    # Create profile directory if it doesn't exist
-    # --------------------------------------------------------
+def save_profile(embedding, username):
 
     os.makedirs(
         PROFILE_DIRECTORY,
         exist_ok=True
     )
 
-    # --------------------------------------------------------
-    # Generate profile filename
-    # --------------------------------------------------------
-
     profile_path = os.path.join(
         PROFILE_DIRECTORY,
         f"{username}_voice.pt"
     )
-
-    # --------------------------------------------------------
-    # Save embedding
-    # --------------------------------------------------------
 
     torch.save(
         embedding.cpu(),
@@ -201,6 +151,32 @@ def save_profile(
     )
 
     return profile_path
+
+
+# ============================================================
+# REGISTER USER IN DATABASE
+# ============================================================
+
+def register_enrolled_user(username, profile_path):
+
+    try:
+
+        add_user(username)
+
+        print(
+            "User registered in database successfully!"
+        )
+
+    except Exception:
+
+        # Remove profile if database registration fails
+        if os.path.exists(profile_path):
+
+            os.remove(profile_path)
+
+        raise
+
+
 # ============================================================
 # REUSABLE ENROLLMENT FUNCTION FOR FASTAPI
 # ============================================================
@@ -213,14 +189,19 @@ def enroll_voice(username, voice_path, verification):
     start_time = time.perf_counter()
 
     # Validate username
-    if not re.fullmatch(r"[a-zA-Z0-9_-]{3,30}", username):
+    if not re.fullmatch(
+        r"[a-zA-Z0-9_-]{3,30}",
+        username
+    ):
+
         raise ValueError(
             "Username must be 3-30 characters and contain "
             "only letters, numbers, underscores or hyphens."
         )
 
-    # Check whether audio file exists
+    # Check audio file
     if not os.path.exists(voice_path):
+
         raise FileNotFoundError(
             f"Voice file not found: {voice_path}"
         )
@@ -232,6 +213,7 @@ def enroll_voice(username, voice_path, verification):
     )
 
     if os.path.exists(profile_path):
+
         raise FileExistsError(
             f"User '{username}' is already enrolled."
         )
@@ -239,7 +221,7 @@ def enroll_voice(username, voice_path, verification):
     # Prepare audio
     audio = prepare_audio(voice_path)
 
-    # Generate voice embedding
+    # Generate embedding
     embedding = generate_embedding(
         verification,
         audio
@@ -251,7 +233,15 @@ def enroll_voice(username, voice_path, verification):
         username
     )
 
-    processing_time = time.perf_counter() - start_time
+    # Register user in SQLite
+    register_enrolled_user(
+        username,
+        saved_path
+    )
+
+    processing_time = (
+        time.perf_counter() - start_time
+    )
 
     return {
         "username": username,
@@ -261,15 +251,12 @@ def enroll_voice(username, voice_path, verification):
         "processing_time": round(processing_time, 4)
     }
 
+
 # ============================================================
 # MAIN ENROLLMENT PROCESS
 # ============================================================
 
 def main():
-
-    # --------------------------------------------------------
-    # Check arguments
-    # --------------------------------------------------------
 
     if len(sys.argv) < 3:
 
@@ -284,7 +271,7 @@ def main():
 
         print(
             "python enrollment_engine.py "
-            "parvez Data/raw/voice1.wav"
+            "parvez data/raw/voice1.wav"
         )
 
         sys.exit(1)
@@ -292,10 +279,6 @@ def main():
     username = sys.argv[1]
 
     voice_path = sys.argv[2]
-
-    # --------------------------------------------------------
-    # Basic username validation
-    # --------------------------------------------------------
 
     if not username.strip():
 
@@ -311,41 +294,22 @@ def main():
         print("          VOICE ENROLLMENT")
         print("----------------------------------------")
 
-        print(
-            f"User: {username}"
-        )
+        print(f"User: {username}")
+        print(f"Voice file: {voice_path}")
 
-        print(
-            f"Voice file: {voice_path}"
-        )
-
-        # ----------------------------------------------------
         # Prepare audio
-        # ----------------------------------------------------
+        audio = prepare_audio(voice_path)
 
-        audio = prepare_audio(
-            voice_path
-        )
-
-        # ----------------------------------------------------
         # Load model
-        # ----------------------------------------------------
-
         verification = load_model()
 
-        # ----------------------------------------------------
         # Generate embedding
-        # ----------------------------------------------------
-
         embedding = generate_embedding(
             verification,
             audio
         )
 
-        # ----------------------------------------------------
-        # Save profile
-        # ----------------------------------------------------
-
+        # Save voice profile
         print("\nSaving voice profile...")
 
         profile_path = save_profile(
@@ -353,14 +317,15 @@ def main():
             username
         )
 
-        print(
-            "Voice profile saved successfully!"
+        print("Voice profile saved successfully!")
+
+        # Register user in SQLite
+        register_enrolled_user(
+            username,
+            profile_path
         )
 
-        # ----------------------------------------------------
         # Verify saved profile
-        # ----------------------------------------------------
-
         saved_embedding = torch.load(
             profile_path,
             map_location="cpu"
@@ -376,30 +341,17 @@ def main():
             f"{saved_embedding.dtype}"
         )
 
-        # ----------------------------------------------------
         # Final result
-        # ----------------------------------------------------
-
         print("\n")
         print("----------------------------------------")
         print("          ENROLLMENT SUCCESSFUL")
         print("----------------------------------------")
 
-        print(
-            f"User:          {username}"
-        )
-
-        print(
-            f"Profile:       {profile_path}"
-        )
-
-        print(
-            f"Embedding:     {saved_embedding.shape}"
-        )
-
-        print(
-            "Status:        REGISTERED"
-        )
+        print(f"User:          {username}")
+        print(f"Profile:       {profile_path}")
+        print(f"Embedding:     {saved_embedding.shape}")
+        print("Status:        REGISTERED")
+        print("Database:      UPDATED")
 
         print("----------------------------------------")
 
@@ -411,9 +363,7 @@ def main():
         print("              ERROR")
         print("----------------------------------------")
 
-        print(
-            f"Error: {e}"
-        )
+        print(f"Error: {e}")
 
         print("----------------------------------------")
 

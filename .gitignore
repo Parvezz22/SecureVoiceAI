@@ -23,3 +23,10 @@ data/raw/
 Thumbs.db
 # Voice biometric profiles
 voice_profiles/*.pt
+
+# SQLite database and temporary files
+securevoice.db
+securevoice.db-wal
+securevoice.db-shm
+securevoice.db-journal
+

@@ -1,33 +1,45 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureVoiceAI | Dashboard</title>
-    <link rel="stylesheet" href="/static/style.css">
+
+```
+<title>SecureVoiceAI | Dashboard</title>
+
+<link rel="stylesheet" href="/static/style.css">
+```
+
 </head>
 
 <body>
 
 ```
 <div class="sidebar">
+
     <h2 class="logo">SecureVoice<span>AI</span></h2>
 
     <nav>
         <a href="/" class="active">Dashboard</a>
-        <a href="#enrollment">Voice Enrollment</a>
-        <a href="#authentication">Authentication</a>
+        <a href="/enroll-page">Voice Enrollment</a>
+        <a href="/authenticate-page">Authentication</a>
     </nav>
 
     <div class="sidebar-footer">
         AI-Powered Voice Security
     </div>
+
 </div>
+
 
 <main class="main-content">
 
+    <!-- HEADER -->
+
     <header class="topbar">
+
         <div>
             <h1>Dashboard</h1>
             <p>Welcome to your voice authentication system.</p>
@@ -36,19 +48,32 @@
         <div class="status-badge">
             ● System Online
         </div>
+
     </header>
 
+
+    <!-- WELCOME SECTION -->
+
     <section class="welcome-card">
+
         <div>
+
             <p class="eyebrow">VOICE BIOMETRIC SECURITY</p>
+
             <h2>Your Voice. Your Identity.</h2>
+
             <p>
                 SecureVoiceAI uses advanced AI technology
                 to recognize and authenticate individuals
                 through their unique voice characteristics.
             </p>
+
         </div>
+
     </section>
+
+
+    <!-- SYSTEM INFORMATION -->
 
     <section class="stats-grid">
 
@@ -72,6 +97,65 @@
 
     </section>
 
+
+    <!-- LIVE DATABASE STATISTICS -->
+
+    <section class="action-section">
+
+        <h2>System Statistics</h2>
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <p>Total Registered Users</p>
+                <h2 id="totalUsers">Loading...</h2>
+                <span>Enrolled users</span>
+            </div>
+
+            <div class="stat-card">
+                <p>Total Authentication Attempts</p>
+                <h2 id="totalAttempts">Loading...</h2>
+                <span>All verification attempts</span>
+            </div>
+
+            <div class="stat-card">
+                <p>Successful Attempts</p>
+                <h2 id="successfulAttempts">Loading...</h2>
+                <span>Verified identities</span>
+            </div>
+
+            <div class="stat-card">
+                <p>Failed Attempts</p>
+                <h2 id="failedAttempts">Loading...</h2>
+                <span>Unsuccessful verifications</span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- RECENT ACTIVITY -->
+
+    <section class="action-section">
+
+        <h2>Recent Authentication Activity</h2>
+
+        <div class="action-card">
+
+            <div id="recentActivity">
+
+                Loading recent activity...
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- VOICE OPERATIONS -->
+
     <section class="action-section">
 
         <h2>Voice Security Operations</h2>
@@ -79,39 +163,197 @@
         <div class="action-grid">
 
             <div class="action-card" id="enrollment">
+
                 <div class="card-icon">01</div>
+
                 <h3>Voice Enrollment</h3>
+
                 <p>
                     Register a new user by uploading
                     their voice recording.
                 </p>
+
                 <a href="/enroll-page" class="btn">
                     Enroll User
                 </a>
+
             </div>
 
+
             <div class="action-card" id="authentication">
+
                 <div class="card-icon">02</div>
+
                 <h3>Voice Authentication</h3>
+
                 <p>
                     Verify a registered user's identity
                     using a new voice recording.
                 </p>
+
                 <a href="/authenticate-page" class="btn">
                     Authenticate
                 </a>
+
             </div>
 
         </div>
 
     </section>
 
+
+    <!-- FOOTER -->
+
     <footer>
         SecureVoiceAI © 2026 | AI-Powered Voice Authentication
     </footer>
 
 </main>
-```
+
+
+<!-- DASHBOARD JAVASCRIPT -->
+
+<script>
+
+    async function loadDashboardStats() {
+
+        const activityBox = document.getElementById(
+            "recentActivity"
+        );
+
+        try {
+
+            const response = await fetch("/dashboard-stats");
+
+            if (!response.ok) {
+                throw new Error("Unable to load dashboard statistics.");
+            }
+
+            const data = await response.json();
+
+
+            // UPDATE STATISTICS
+
+            document.getElementById("totalUsers").textContent =
+                data.total_users;
+
+            document.getElementById("totalAttempts").textContent =
+                data.total_attempts;
+
+            document.getElementById("successfulAttempts").textContent =
+                data.successful_attempts;
+
+            document.getElementById("failedAttempts").textContent =
+                data.failed_attempts;
+
+
+            // UPDATE RECENT ACTIVITY
+
+            if (data.recent_activity.length === 0) {
+
+                activityBox.textContent =
+                    "No authentication activity available.";
+
+                return;
+
+            }
+
+
+            const table = document.createElement("table");
+
+            table.style.width = "100%";
+            table.style.borderCollapse = "collapse";
+
+            const headers = [
+                "Username",
+                "Result",
+                "Similarity Score",
+                "Confidence",
+                "Date & Time"
+            ];
+
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+
+            headers.forEach(function (header) {
+
+                const th = document.createElement("th");
+
+                th.textContent = header;
+                th.style.padding = "12px";
+                th.style.textAlign = "left";
+
+                headerRow.appendChild(th);
+
+            });
+
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+
+            const tbody = document.createElement("tbody");
+
+            data.recent_activity.forEach(function (activity) {
+
+                const row = document.createElement("tr");
+
+                const values = [
+                    activity.username,
+                    activity.authentication,
+                    activity.similarity_score,
+                    activity.confidence,
+                    activity.timestamp.replace("T", " ")
+                ];
+
+                values.forEach(function (value, index) {
+
+                    const td = document.createElement("td");
+
+                    td.textContent = value ?? "N/A";
+                    td.style.padding = "12px";
+
+                    if (index === 1) {
+
+                        td.style.color =
+                            value === "SUCCESS" ? "#22c55e" : "#ef4444";
+
+                    }
+
+                    row.appendChild(td);
+
+                });
+
+                tbody.appendChild(row);
+
+            });
+
+            table.appendChild(tbody);
+
+            activityBox.replaceChildren(table);
+
+        }
+
+        catch (error) {
+
+            console.error("Dashboard Error:", error);
+
+            activityBox.textContent =
+                "Unable to load dashboard data. Please refresh the page.";
+
+        }
+
+    }
+
+
+    // LOAD DATA WHEN PAGE OPENS
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        loadDashboardStats
+    );
+
+</script>
 
 </body>
+
 </html>
