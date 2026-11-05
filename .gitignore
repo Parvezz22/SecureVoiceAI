@@ -30,3 +30,6 @@ securevoice.db-wal
 securevoice.db-shm
 securevoice.db-journal
 
+
+# VoxCeleb evaluation dataset (licensed research data)
+Data/Evaluation/
