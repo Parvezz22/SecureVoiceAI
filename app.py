@@ -21,8 +21,10 @@ from database import (
     log_authentication,
     get_dashboard_stats,
     get_authentication_history,
-    get_all_users
+    get_all_users,
+    get_analytics_data
 )
+
 
 # ============================================================
 # INITIALIZE FASTAPI
@@ -72,28 +74,28 @@ def home():
 
     return FileResponse("templates/index.html")
 
+
+# ============================================================
+# PAGE ROUTES
+# ============================================================
+
 @app.get("/history-page")
 def history_page():
+
     return FileResponse("templates/history.html")
+
 
 @app.get("/users-page")
 def users_page():
+
     return FileResponse("templates/users.html")
 
-
-# ============================================================
-# ENROLLMENT PAGE
-# ============================================================
 
 @app.get("/enroll-page")
 def enrollment_page():
 
     return FileResponse("templates/enroll.html")
 
-
-# ============================================================
-# AUTHENTICATION PAGE
-# ============================================================
 
 @app.get("/authenticate-page")
 def authentication_page():
@@ -137,8 +139,6 @@ async def authenticate_user(
 
     try:
 
-        # Save uploaded audio temporarily
-
         suffix = os.path.splitext(
             voice.filename or ""
         )[1] or ".wav"
@@ -155,15 +155,11 @@ async def authenticate_user(
                 temp_file
             )
 
-        # Authenticate voice
-
         result = authenticate_voice(
             username,
             temp_path,
             verification_model
         )
-
-        # Save authentication attempt in database
 
         log_authentication(result)
 
@@ -215,8 +211,6 @@ async def enroll_user(
 
     try:
 
-        # Save uploaded audio temporarily
-
         suffix = os.path.splitext(
             voice.filename or ""
         )[1] or ".wav"
@@ -232,8 +226,6 @@ async def enroll_user(
                 voice.file,
                 temp_file
             )
-
-        # Enroll user
 
         result = enroll_voice(
             username,
@@ -279,6 +271,7 @@ async def enroll_user(
 
         await voice.close()
 
+
 # ============================================================
 # LIVE TWO-RECORDING ENROLLMENT API
 # ============================================================
@@ -303,8 +296,6 @@ async def enroll_live_user(
 
     try:
 
-        # Save both recordings temporarily
-
         for voice in [voice1, voice2]:
 
             with tempfile.NamedTemporaryFile(
@@ -318,8 +309,6 @@ async def enroll_live_user(
                     voice.file,
                     temp_file
                 )
-
-        # Enroll using both recordings
 
         result = enroll_voice_from_recordings(
             username,
@@ -363,10 +352,12 @@ async def enroll_live_user(
         for path in temp_paths:
 
             if os.path.exists(path):
+
                 os.remove(path)
 
         await voice1.close()
         await voice2.close()
+
 
 # ============================================================
 # DASHBOARD STATISTICS API
@@ -387,16 +378,45 @@ def dashboard_stats():
             status_code=500,
             detail=str(e)
         )
+
+
+# ============================================================
+# INTERACTIVE ANALYTICS API
+# ============================================================
+
+@app.get("/analytics-data")
+def analytics_data():
+
+    try:
+
+        analytics = get_analytics_data()
+
+        return analytics
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+
+# ============================================================
 # GET COMPLETE AUTHENTICATION HISTORY
+# ============================================================
 
 @app.get("/authentication-history")
 def authentication_history(
+
     username: str = None,
     status: str = None
+
 ):
 
     try:
+
         if status and status.upper() not in ["SUCCESS", "FAILED"]:
+
             raise HTTPException(
                 status_code=400,
                 detail="Status must be SUCCESS or FAILED"
@@ -413,18 +433,26 @@ def authentication_history(
         }
 
     except HTTPException:
+
         raise
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 
+# ============================================================
 # GET ALL REGISTERED USERS
+# ============================================================
 
 @app.get("/users")
 def registered_users():
 
     try:
+
         users = get_all_users()
 
         return {
@@ -433,4 +461,8 @@ def registered_users():
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )

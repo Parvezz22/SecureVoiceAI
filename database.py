@@ -215,3 +215,120 @@ if __name__ == "__main__":
 
     print("Database initialized successfully!")
     print(get_dashboard_stats())
+
+# ============================================================
+# GET ANALYTICS DATA FOR INTERACTIVE DASHBOARD
+# ============================================================
+
+def get_analytics_data():
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+
+        # ----------------------------------------------------
+        # AUTHENTICATION SUMMARY
+        # ----------------------------------------------------
+
+        summary = cursor.execute("""
+            SELECT
+                COUNT(*) AS total_attempts,
+
+                SUM(
+                    CASE
+                        WHEN authentication = 'SUCCESS'
+                        THEN 1 ELSE 0
+                    END
+                ) AS successful_attempts,
+
+                SUM(
+                    CASE
+                        WHEN authentication = 'FAILED'
+                        THEN 1 ELSE 0
+                    END
+                ) AS failed_attempts,
+
+                AVG(similarity_score) AS average_similarity,
+
+                AVG(processing_time) AS average_processing_time
+
+            FROM authentication_logs
+        """).fetchone()
+
+        # ----------------------------------------------------
+        # DAILY AUTHENTICATION ACTIVITY
+        # ----------------------------------------------------
+
+        daily_activity = cursor.execute("""
+            SELECT
+                date(timestamp) AS activity_date,
+
+                SUM(
+                    CASE
+                        WHEN authentication = 'SUCCESS'
+                        THEN 1 ELSE 0
+                    END
+                ) AS successful,
+
+                SUM(
+                    CASE
+                        WHEN authentication = 'FAILED'
+                        THEN 1 ELSE 0
+                    END
+                ) AS failed
+
+            FROM authentication_logs
+
+            WHERE date(timestamp) >= date('now', 'localtime', '-6 days')
+
+            GROUP BY date(timestamp)
+
+            ORDER BY activity_date ASC
+        """).fetchall()
+
+        # ----------------------------------------------------
+        # SIMILARITY SCORE DISTRIBUTION
+        # ----------------------------------------------------
+
+        score_distribution = cursor.execute("""
+            SELECT
+
+                CASE
+                    WHEN similarity_score < 0.0 THEN 'Below 0.0'
+                    WHEN similarity_score < 0.2 THEN '0.0 - 0.2'
+                    WHEN similarity_score < 0.4 THEN '0.2 - 0.4'
+                    WHEN similarity_score < 0.6 THEN '0.4 - 0.6'
+                    WHEN similarity_score < 0.8 THEN '0.6 - 0.8'
+                    ELSE '0.8 - 1.0'
+                END AS score_range,
+
+                COUNT(*) AS total
+
+            FROM authentication_logs
+
+            WHERE similarity_score IS NOT NULL
+
+            GROUP BY score_range
+
+            ORDER BY MIN(similarity_score)
+
+        """).fetchall()
+
+        return {
+
+            "summary": dict(summary),
+
+            "daily_activity": [
+                dict(row) for row in daily_activity
+            ],
+
+            "score_distribution": [
+                dict(row) for row in score_distribution
+            ]
+
+        }
+
+    finally:
+
+        connection.close()
