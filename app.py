@@ -1,4 +1,4 @@
-import os
+﻿import os
 import re
 import shutil
 import tempfile
@@ -43,6 +43,8 @@ from database import (
     get_analytics_data,
     delete_user
 )
+
+from report_routes import router as report_router
 
 from security import (
     SESSION_SECRET,
@@ -803,3 +805,5 @@ def delete_registered_user(
             status_code=500,
             detail="Unable to delete the registered user."
         )
+
+app.include_router(report_router)

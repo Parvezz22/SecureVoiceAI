@@ -955,3 +955,12 @@ tr:hover {
     font-size: 11px;
     opacity: 0.65;
 }
+
+/* FEATURE 6 - REPORT EXPORT BUTTON SPACING */
+
+.export-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}

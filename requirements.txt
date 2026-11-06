@@ -13,3 +13,4 @@ itsdangerous
 pwdlib[argon2]
 
 python-dotenv
+reportlab

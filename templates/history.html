@@ -1,14 +1,41 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SecureVoiceAI | Authentication History</title>
+    <title>SecureVoiceAI | Authentication History</title>
 
-<link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        .export-section {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .export-section a {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .export-csv {
+            background: #08916d;
+        }
+
+        .export-pdf {
+            background: #2563eb;
+        }
+
+        .export-section a:hover {
+            opacity: 0.85;
+        }
+    </style>
 
 </head>
 
@@ -16,108 +43,135 @@
 
 <div class="sidebar">
 
-<h2 class="logo">SecureVoice<span>AI</span></h2>
+    <h2 class="logo">SecureVoice<span>AI</span></h2>
 
-<nav>
-    <a href="/">Dashboard</a>
-    <a href="/enroll-page">Voice Enrollment</a>
-    <a href="/authenticate-page">Authentication</a>
-    <a href="/history-page" class="active">History</a>
-    <a href="/users-page">Registered Users</a>
-</nav>
+    <nav>
+        <a href="/">Dashboard</a>
+        <a href="/enroll-page">Voice Enrollment</a>
+        <a href="/authenticate-page">Authentication</a>
+        <a href="/history-page" class="active">History</a>
+        <a href="/users-page">Registered Users</a>
+    </nav>
 
-<div class="sidebar-footer">
-    AI-Powered Voice Security
+    <div class="sidebar-footer">
+        AI-Powered Voice Security
+    </div>
+
 </div>
 
-</div>
 
 <main class="main-content">
 
-<header class="topbar">
+    <header class="topbar">
 
-    <div>
-        <h1>Authentication History</h1>
-        <p>Monitor and review voice authentication attempts.</p>
-    </div>
+        <div>
+            <h1>Authentication History</h1>
+            <p>Monitor and review voice authentication attempts.</p>
+        </div>
 
-    <div class="status-badge">
-        ● System Online
-    </div>
+        <div class="status-badge">
+            System Online
+        </div>
 
-</header>
-
-
-<section class="table-container">
-
-    <h2>Authentication Records</h2>
-
-    <p class="table-info" id="recordCount">
-        Loading records...
-    </p>
+    </header>
 
 
-    <div class="filter-section">
+    <section class="table-container">
 
-        <input
-            type="text"
-            id="usernameFilter"
-            placeholder="Search username..."
-        >
+        <h2>Authentication Records</h2>
 
-        <select id="statusFilter">
-
-            <option value="">All Results</option>
-
-            <option value="SUCCESS">Successful</option>
-
-            <option value="FAILED">Failed</option>
-
-        </select>
-
-        <button class="btn" id="refreshButton">
-            Refresh
-        </button>
-
-    </div>
+        <p class="table-info" id="recordCount">
+            Loading records...
+        </p>
 
 
-    <table>
+        <!-- REPORT EXPORT BUTTONS -->
 
-        <thead>
+        <div class="export-section">
 
-            <tr>
-                <th>Username</th>
-                <th>Result</th>
-                <th>Similarity Score</th>
-                <th>Threshold</th>
-                <th>Confidence</th>
-                <th>Processing Time</th>
-                <th>Timestamp</th>
-            </tr>
+            <a
+                href="/export/history/csv"
+                class="btn export-csv"
+            >
+                Download CSV
+            </a>
 
-        </thead>
+            <a
+                href="/export/history/pdf"
+                class="btn export-pdf"
+            >
+                Download PDF
+            </a>
 
-        <tbody id="historyTable">
-
-            <tr>
-                <td colspan="7" class="empty-message">
-                    Loading authentication history...
-                </td>
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</section>
+        </div>
 
 
-<footer>
-    SecureVoiceAI © 2026 | AI-Powered Voice Authentication
-</footer>
+        <!-- SEARCH AND FILTER -->
+
+        <div class="filter-section">
+
+            <input
+                type="text"
+                id="usernameFilter"
+                placeholder="Search username..."
+            >
+
+            <select id="statusFilter">
+
+                <option value="">All Results</option>
+
+                <option value="SUCCESS">Successful</option>
+
+                <option value="FAILED">Failed</option>
+
+            </select>
+
+            <button class="btn" id="refreshButton">
+                Refresh
+            </button>
+
+        </div>
+
+
+        <!-- AUTHENTICATION HISTORY TABLE -->
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Username</th>
+                    <th>Result</th>
+                    <th>Similarity Score</th>
+                    <th>Threshold</th>
+                    <th>Confidence</th>
+                    <th>Processing Time</th>
+                    <th>Timestamp</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="historyTable">
+
+                <tr>
+                    <td colspan="7" class="empty-message">
+                        Loading authentication history...
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+
+    <footer>
+        SecureVoiceAI &copy; 2026 | AI-Powered Voice Authentication
+    </footer>
 
 </main>
+
 
 <script>
 
@@ -185,7 +239,6 @@ async function loadHistory() {
 
             return;
         }
-
 
         data.history.forEach(record => {
 
