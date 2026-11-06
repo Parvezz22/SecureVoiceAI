@@ -217,6 +217,29 @@ def get_all_users():
         connection.close()
 
 
+# DELETE REGISTERED USER
+# Authentication history is intentionally preserved.
+
+def delete_user(username):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute("""
+            DELETE FROM users
+            WHERE username = ?
+        """, (username,))
+
+        deleted = cursor.rowcount > 0
+
+        connection.commit()
+
+        return deleted
+
+    finally:
+        connection.close()
+
+
 # GET ANALYTICS DATA
 
 def get_analytics_data():

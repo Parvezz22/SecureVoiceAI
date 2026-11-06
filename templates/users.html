@@ -1,162 +1,319 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SecureVoiceAI | Registered Users</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
 
-<link rel="stylesheet" href="/static/style.css">
+    <title>SecureVoiceAI | Voice Profile Management</title>
 
+    <link rel="stylesheet" href="/static/style.css">
 
+    <style>
+        .profile-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .profile-search {
+            flex: 1;
+            min-width: 220px;
+            max-width: 400px;
+            padding: 12px 15px;
+            border: 1px solid #26364d;
+            border-radius: 8px;
+            background: #101c2e;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .profile-search:focus {
+            border-color: #00c8d7;
+        }
+
+        .profile-status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .profile-available {
+            background: rgba(0, 200, 140, 0.13);
+            color: #00d99a;
+        }
+
+        .profile-missing {
+            background: rgba(255, 170, 50, 0.13);
+            color: #ffb347;
+        }
+
+        .delete-button {
+            padding: 8px 13px;
+            border: 1px solid #e05252;
+            border-radius: 6px;
+            background: transparent;
+            color: #ff7070;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .delete-button:hover {
+            background: #e05252;
+            color: white;
+        }
+
+        .delete-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .profile-size {
+            display: block;
+            margin-top: 5px;
+            color: #8d9caf;
+            font-size: 11px;
+        }
+
+        .message-box {
+            display: none;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 7px;
+            font-size: 13px;
+        }
+
+        .message-success {
+            display: block;
+            background: rgba(0, 200, 140, 0.12);
+            color: #00d99a;
+        }
+
+        .message-error {
+            display: block;
+            background: rgba(255, 80, 80, 0.12);
+            color: #ff7777;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        .logout-form {
+            padding: 15px 20px;
+        }
+
+        .logout-button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #34445c;
+            border-radius: 7px;
+            background: transparent;
+            color: #d5e0ed;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .logout-button:hover {
+            background: #26364d;
+        }
+
+        @media (max-width: 600px) {
+            .profile-toolbar {
+                align-items: stretch;
+            }
+
+            .profile-search {
+                max-width: none;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="sidebar">
 
-<h2 class="logo">SecureVoice<span>AI</span></h2>
+    <h2 class="logo">SecureVoice<span>AI</span></h2>
 
-<nav>
-    <a href="/">Dashboard</a>
-    <a href="/enroll-page">Voice Enrollment</a>
-    <a href="/authenticate-page">Authentication</a>
-    <a href="/history-page">History</a>
-    <a href="/users-page" class="active">Registered Users</a>
-</nav>
+    <nav>
+        <a href="/">Dashboard</a>
+        <a href="/enroll-page">Voice Enrollment</a>
+        <a href="/authenticate-page">Authentication</a>
+        <a href="/history-page">History</a>
+        <a href="/users-page" class="active">Voice Profiles</a>
+    </nav>
 
-<div class="sidebar-footer">
-    AI-Powered Voice Security
+    <div class="sidebar-footer">
+        AI-Powered Voice Security
+    </div>
+
+    <form action="/admin/logout" method="POST" class="logout-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="logout-button">↪ Logout</button>
+    </form>
+
 </div>
 
-</div>
 
 <main class="main-content">
 
-<header class="topbar">
-
-    <div>
-        <h1>User Management</h1>
-        <p>Manage and monitor registered voice identities.</p>
-    </div>
-
-    <div class="status-badge">
-        ● System Online
-    </div>
-
-</header>
-
-
-<section class="stats-grid">
-
-    <div class="stat-card">
-
-        <p>Total Registered Users</p>
-
-        <h2 id="totalUsers">--</h2>
-
-        <span>Enrolled voice identities</span>
-
-    </div>
-
-    <div class="stat-card">
-
-        <p>Registration System</p>
-
-        <h2>ACTIVE</h2>
-
-        <span>Voice enrollment available</span>
-
-    </div>
-
-    <div class="stat-card">
-
-        <p>Biometric Model</p>
-
-        <h2>ECAPA-TDNN</h2>
-
-        <span>192-dimensional embeddings</span>
-
-    </div>
-
-</section>
-
-
-<section class="table-container">
-
-    <div class="users-heading">
+    <header class="topbar">
 
         <div>
-            <h2>Registered Users</h2>
-
-            <p class="table-info" id="userCount">
-                Loading registered users...
-            </p>
+            <h1>Voice Profile Management</h1>
+            <p>Manage registered identities and their biometric profiles.</p>
         </div>
 
-        <button class="btn" id="refreshUsers">
-            Refresh Users
-        </button>
+        <div class="status-badge">
+            ● System Online
+        </div>
 
-    </div>
-
-
-    <div class="filter-section">
-
-        <input
-            type="text"
-            id="searchUser"
-            placeholder="Search registered username..."
-        >
-
-    </div>
+    </header>
 
 
-    <table>
+    <!-- SUMMARY CARDS -->
 
-        <thead>
+    <section class="stats-grid">
 
-            <tr>
-                <th>USER ID</th>
-                <th>USERNAME</th>
-                <th>ENROLLMENT DATE</th>
-                <th>STATUS</th>
-            </tr>
+        <div class="stat-card">
+            <p>Total Registered Users</p>
+            <h2 id="totalUsers">--</h2>
+            <span>Registered voice identities</span>
+        </div>
 
-        </thead>
+        <div class="stat-card">
+            <p>Available Voice Profiles</p>
+            <h2 id="availableProfiles">--</h2>
+            <span>Stored biometric profiles</span>
+        </div>
 
-        <tbody id="usersTable">
+        <div class="stat-card">
+            <p>Missing Voice Profiles</p>
+            <h2 id="missingProfiles">--</h2>
+            <span>Profiles requiring attention</span>
+        </div>
 
-            <tr>
-                <td colspan="4" class="empty-message">
-                    Loading users...
-                </td>
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</section>
+    </section>
 
 
-<footer>
-    SecureVoiceAI © 2026 | AI-Powered Voice Authentication
-</footer>
+    <!-- PROFILE MANAGEMENT TABLE -->
+
+    <section class="table-container">
+
+        <div class="users-heading">
+
+            <div>
+                <h2>Registered Voice Identities</h2>
+
+                <p class="table-info" id="userCount">
+                    Loading voice profiles...
+                </p>
+            </div>
+
+            <button class="btn" id="refreshUsers">
+                Refresh Profiles
+            </button>
+
+        </div>
+
+
+        <div class="profile-toolbar">
+
+            <input
+                type="text"
+                id="searchUser"
+                class="profile-search"
+                placeholder="Search by username..."
+                autocomplete="off"
+            >
+
+        </div>
+
+
+        <div id="messageBox" class="message-box" role="status"></div>
+
+
+        <div class="table-scroll">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>USER ID</th>
+                        <th>USERNAME</th>
+                        <th>ENROLLMENT DATE</th>
+                        <th>VOICE PROFILE</th>
+                        <th>ACTION</th>
+                    </tr>
+                </thead>
+
+                <tbody id="usersTable">
+
+                    <tr>
+                        <td colspan="5" class="empty-message">
+                            Loading users...
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <footer>
+        SecureVoiceAI &copy; 2026 | AI-Powered Voice Authentication
+    </footer>
 
 </main>
+
 
 <script>
 
 const usersTable = document.getElementById("usersTable");
+
 const totalUsers = document.getElementById("totalUsers");
+const availableProfiles = document.getElementById("availableProfiles");
+const missingProfiles = document.getElementById("missingProfiles");
+
 const userCount = document.getElementById("userCount");
 const searchUser = document.getElementById("searchUser");
+const messageBox = document.getElementById("messageBox");
+
+const csrfToken = document
+    .querySelector('meta[name="csrf-token"]')
+    .getAttribute("content");
 
 let registeredUsers = [];
 
+
+// DISPLAY MESSAGE
+
+function showMessage(message, type) {
+
+    messageBox.textContent = message;
+
+    messageBox.className = "message-box " +
+        (type === "success" ? "message-success" : "message-error");
+
+}
+
+
+// LOAD REGISTERED USERS
 
 async function loadUsers() {
 
@@ -165,19 +322,28 @@ async function loadUsers() {
     const loadingRow = document.createElement("tr");
     const loadingCell = document.createElement("td");
 
-    loadingCell.colSpan = 4;
+    loadingCell.colSpan = 5;
     loadingCell.className = "empty-message";
-    loadingCell.textContent = "Loading users...";
+    loadingCell.textContent = "Loading voice profiles...";
 
     loadingRow.appendChild(loadingCell);
     usersTable.appendChild(loadingRow);
+
+    messageBox.className = "message-box";
 
     try {
 
         const response = await fetch("/users");
 
         if (!response.ok) {
+
+            if (response.status === 401) {
+                window.location.href = "/admin/login";
+                return;
+            }
+
             throw new Error("Unable to fetch registered users.");
+
         }
 
         const data = await response.json();
@@ -185,6 +351,12 @@ async function loadUsers() {
         registeredUsers = data.users;
 
         totalUsers.textContent = data.total_users;
+
+        availableProfiles.textContent =
+            registeredUsers.filter(user => user.profile_exists).length;
+
+        missingProfiles.textContent =
+            registeredUsers.filter(user => !user.profile_exists).length;
 
         displayUsers();
 
@@ -197,7 +369,7 @@ async function loadUsers() {
         const row = document.createElement("tr");
         const cell = document.createElement("td");
 
-        cell.colSpan = 4;
+        cell.colSpan = 5;
         cell.className = "empty-message";
         cell.textContent = error.message;
 
@@ -205,12 +377,17 @@ async function loadUsers() {
         usersTable.appendChild(row);
 
         totalUsers.textContent = "--";
-        userCount.textContent = "Unable to load users.";
+        availableProfiles.textContent = "--";
+        missingProfiles.textContent = "--";
+
+        userCount.textContent = "Unable to load voice profiles.";
 
     }
 
 }
 
+
+// DISPLAY USERS
 
 function displayUsers() {
 
@@ -230,7 +407,7 @@ function displayUsers() {
         const row = document.createElement("tr");
         const cell = document.createElement("td");
 
-        cell.colSpan = 4;
+        cell.colSpan = 5;
         cell.className = "empty-message";
         cell.textContent = "No registered users found.";
 
@@ -246,11 +423,19 @@ function displayUsers() {
 
         const row = document.createElement("tr");
 
+        // USER ID
+
         const idCell = document.createElement("td");
         idCell.textContent = user.id;
 
+
+        // USERNAME
+
         const usernameCell = document.createElement("td");
         usernameCell.textContent = user.username;
+
+
+        // ENROLLMENT DATE
 
         const dateCell = document.createElement("td");
 
@@ -260,19 +445,63 @@ function displayUsers() {
             ? user.enrolled_at
             : date.toLocaleString();
 
-        const statusCell = document.createElement("td");
+
+        // VOICE PROFILE STATUS
+
+        const profileCell = document.createElement("td");
 
         const badge = document.createElement("span");
 
-        badge.className = "user-status";
-        badge.textContent = "ENROLLED";
+        badge.className = "profile-status";
 
-        statusCell.appendChild(badge);
+        if (user.profile_exists) {
+
+            badge.classList.add("profile-available");
+            badge.textContent = "AVAILABLE";
+
+            const size = document.createElement("span");
+
+            size.className = "profile-size";
+
+            size.textContent =
+                user.profile_size_bytes !== null
+                    ? `${(user.profile_size_bytes / 1024).toFixed(2)} KB`
+                    : "";
+
+            profileCell.appendChild(badge);
+            profileCell.appendChild(size);
+
+        } else {
+
+            badge.classList.add("profile-missing");
+            badge.textContent = "MISSING";
+
+            profileCell.appendChild(badge);
+
+        }
+
+
+        // DELETE ACTION
+
+        const actionCell = document.createElement("td");
+
+        const deleteButton = document.createElement("button");
+
+        deleteButton.className = "delete-button";
+        deleteButton.textContent = "Delete";
+
+        deleteButton.addEventListener("click", () => {
+            deleteUser(user.username, deleteButton);
+        });
+
+        actionCell.appendChild(deleteButton);
+
 
         row.appendChild(idCell);
         row.appendChild(usernameCell);
         row.appendChild(dateCell);
-        row.appendChild(statusCell);
+        row.appendChild(profileCell);
+        row.appendChild(actionCell);
 
         usersTable.appendChild(row);
 
@@ -281,16 +510,73 @@ function displayUsers() {
 }
 
 
-// Search users
+// DELETE REGISTERED USER
+
+async function deleteUser(username, button) {
+
+    const confirmed = window.confirm(
+        `Are you sure you want to delete "${username}"?\n\n` +
+        "This will remove the registered user and their voice profile. " +
+        "Authentication history will be preserved."
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Deleting...";
+
+    try {
+
+        const response = await fetch(
+            `/users/${encodeURIComponent(username)}`,
+            {
+                method: "DELETE",
+
+                headers: {
+                    "X-CSRF-Token": csrfToken
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || "Unable to delete user.");
+        }
+
+        showMessage(data.message, "success");
+
+        await loadUsers();
+
+    }
+
+    catch (error) {
+
+        showMessage(error.message, "error");
+
+        button.disabled = false;
+        button.textContent = "Delete";
+
+    }
+
+}
+
+
+// SEARCH USERS
+
 searchUser.addEventListener("input", displayUsers);
 
 
-// Refresh users
+// REFRESH USERS
+
 document.getElementById("refreshUsers")
     .addEventListener("click", loadUsers);
 
 
-// Load users when page opens
+// INITIAL PAGE LOAD
+
 loadUsers();
 
 </script>

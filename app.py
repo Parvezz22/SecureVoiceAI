@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import tempfile
 
@@ -39,7 +40,8 @@ from database import (
     get_dashboard_stats,
     get_authentication_history,
     get_all_users,
-    get_analytics_data
+    get_analytics_data,
+    delete_user
 )
 
 from security import (
@@ -85,6 +87,45 @@ app.mount(
     StaticFiles(directory="static"),
     name="static"
 )
+
+
+# ============================================================
+# VOICE PROFILE CONFIGURATION
+# ============================================================
+
+PROFILE_DIRECTORY = Path("voice_profiles")
+
+
+def get_voice_profile_path(username):
+
+    if not re.fullmatch(r"[a-zA-Z0-9_-]{3,30}", username):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid username."
+        )
+
+    profile_directory = PROFILE_DIRECTORY.resolve()
+
+    profile_path = (
+        PROFILE_DIRECTORY / f"{username}_voice.pt"
+    )
+
+    # Reject symbolic links to avoid deleting unrelated files.
+    if profile_path.is_symlink():
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid voice profile file."
+        )
+
+    resolved_path = profile_path.resolve()
+
+    if resolved_path.parent != profile_directory:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid voice profile path."
+        )
+
+    return profile_path
 
 
 # ============================================================
@@ -165,12 +206,10 @@ async def admin_login(
             status_code=401
         )
 
-    # Clear previous session to prevent session fixation.
     request.session.clear()
 
     request.session["admin_username"] = admin["username"]
 
-    # Generate a fresh CSRF token for the authenticated session.
     generate_csrf_token(request)
 
     return RedirectResponse(
@@ -239,9 +278,29 @@ def history_page(admin=Depends(require_admin)):
 
 
 @app.get("/users-page")
-def users_page(admin=Depends(require_admin)):
+def users_page(
+    request: Request,
+    admin=Depends(require_admin)
+):
 
-    return FileResponse("templates/users.html")
+    template_path = Path("templates/users.html")
+
+    if not template_path.exists():
+        raise HTTPException(
+            status_code=500,
+            detail="Users template not found."
+        )
+
+    html = template_path.read_text(encoding="utf-8")
+
+    csrf_token = generate_csrf_token(request)
+
+    html = html.replace(
+        "{{ csrf_token }}",
+        csrf_token
+    )
+
+    return HTMLResponse(content=html)
 
 
 # ============================================================
@@ -602,6 +661,22 @@ def registered_users(admin=Depends(require_admin)):
 
         users = get_all_users()
 
+        for user in users:
+
+            profile_path = get_voice_profile_path(
+                user["username"]
+            )
+
+            profile_exists = profile_path.is_file()
+
+            user["profile_exists"] = profile_exists
+
+            user["profile_size_bytes"] = (
+                profile_path.stat().st_size
+                if profile_exists
+                else None
+            )
+
         return {
             "total_users": len(users),
             "users": users
@@ -612,4 +687,119 @@ def registered_users(admin=Depends(require_admin)):
         raise HTTPException(
             status_code=500,
             detail=str(e)
+        )
+
+
+# ============================================================
+# DELETE USER AND VOICE PROFILE - ADMIN ONLY
+# ============================================================
+
+@app.delete("/users/{username}")
+def delete_registered_user(
+
+    username: str,
+    request: Request,
+    admin=Depends(require_admin)
+
+):
+
+    # Validate CSRF token.
+    validate_csrf_token(
+        request,
+        request.headers.get("X-CSRF-Token")
+    )
+
+    profile_path = get_voice_profile_path(username)
+
+    quarantine_path = (
+        profile_path.parent /
+        f".{username}_voice.pt.deleting"
+    )
+
+    if quarantine_path.exists():
+        raise HTTPException(
+            status_code=409,
+            detail="A previous profile deletion needs attention."
+        )
+
+    profile_exists = profile_path.is_file()
+
+    try:
+
+        # Temporarily move the profile before deleting the database row.
+        if profile_exists:
+
+            os.replace(
+                profile_path,
+                quarantine_path
+            )
+
+        deleted = delete_user(username)
+
+        if not deleted:
+
+            # Restore the profile if the database user does not exist.
+            if profile_exists and quarantine_path.exists():
+
+                os.replace(
+                    quarantine_path,
+                    profile_path
+                )
+
+            raise HTTPException(
+                status_code=404,
+                detail="Registered user not found."
+            )
+
+        # Permanently remove the quarantined profile.
+        if profile_exists:
+
+            try:
+
+                quarantine_path.unlink()
+
+            except OSError:
+
+                return {
+                    "success": True,
+                    "message": (
+                        "User removed from registration. "
+                        "The old profile file needs manual cleanup."
+                    ),
+                    "profile_deleted": False,
+                    "history_preserved": True
+                }
+
+        return {
+            "success": True,
+            "message": "User and voice profile deleted successfully.",
+            "profile_deleted": profile_exists,
+            "history_preserved": True
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+
+        # Restore the profile if deletion failed.
+        if (
+            profile_exists
+            and quarantine_path.exists()
+            and not profile_path.exists()
+        ):
+
+            try:
+
+                os.replace(
+                    quarantine_path,
+                    profile_path
+                )
+
+            except OSError:
+                pass
+
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to delete the registered user."
         )
