@@ -1,6 +1,7 @@
 // ============================================================
 // SECUREVOICE AI
 // LIVE VOICE AUTHENTICATION + FILE UPLOAD
+// FEATURE 3 - ADVANCED VOICE SIMILARITY ANALYSIS
 // ============================================================
 
 
@@ -329,25 +330,31 @@ async function startRecording() {
 
                 const audioContext = new AudioContext();
 
-                const arrayBuffer = await originalBlob.arrayBuffer();
+                try {
 
-                const decodedAudio = await audioContext.decodeAudioData(arrayBuffer);
+                    const arrayBuffer = await originalBlob.arrayBuffer();
 
-                const wavBlob = audioBufferToWav(decodedAudio);
+                    const decodedAudio =
+                        await audioContext.decodeAudioData(arrayBuffer);
 
-                await audioContext.close();
+                    const wavBlob = audioBufferToWav(decodedAudio);
+
+                    recordedBlob = wavBlob;
+
+                    recordedFile = new File(
+                        [wavBlob],
+                        "authentication_voice.wav",
+                        { type: "audio/wav" }
+                    );
+
+                } finally {
+
+                    await audioContext.close();
+
+                }
 
 
-                recordedBlob = wavBlob;
-
-                recordedFile = new File(
-                    [wavBlob],
-                    "authentication_voice.wav",
-                    { type: "audio/wav" }
-                );
-
-
-                const audioURL = URL.createObjectURL(wavBlob);
+                const audioURL = URL.createObjectURL(recordedBlob);
 
                 recordedAudio.src = audioURL;
 
@@ -427,13 +434,13 @@ function stopRecording() {
 
     isRecording = false;
 
+    recordBtn.disabled = true;
+
     mediaRecorder.stop();
 
     stopMicrophone();
 
     recordBtn.textContent = "● Processing Recording...";
-
-    recordBtn.disabled = true;
 
     setTimeout(() => {
 
@@ -571,67 +578,198 @@ liveAuthenticateBtn.addEventListener("click", async function () {
 
 
 // ============================================================
-// DISPLAY AUTHENTICATION RESULT
+// FEATURE 3 - ADVANCED AUTHENTICATION RESULT
 // ============================================================
 
 function displayAuthenticationResult(data, box) {
 
     const username = escapeHTML(data.username);
-
     const result = escapeHTML(data.authentication);
-
-    const similarity = escapeHTML(data.similarity_score);
-
-    const threshold = escapeHTML(data.threshold);
-
     const confidence = escapeHTML(data.confidence);
 
+    const score = Number(data.similarity_score);
+    const threshold = Number(data.threshold);
+    const processingTime = Number(data.processing_time);
 
-    if (data.same_speaker) {
 
-        box.className = "result-box success";
+    // Validate numerical values.
 
-        box.innerHTML = `
-
-            <h3>✓ Authentication Successful!</h3>
-
-            <p><strong>Username:</strong> ${username}</p>
-
-            <p><strong>Result:</strong> ${result}</p>
-
-            <p><strong>Similarity Score:</strong> ${similarity}</p>
-
-            <p><strong>Threshold:</strong> ${threshold}</p>
-
-            <p><strong>Confidence:</strong> ${confidence}</p>
-
-            <p><strong>Processing Time:</strong>
-                ${escapeHTML(data.processing_time)} seconds
-            </p>
-
-        `;
-
-    } else {
+    if (
+        !Number.isFinite(score) ||
+        !Number.isFinite(threshold) ||
+        !Number.isFinite(processingTime)
+    ) {
 
         box.className = "result-box error";
 
-        box.innerHTML = `
+        box.textContent = "Invalid authentication result received.";
 
-            <h3>✕ Authentication Failed!</h3>
-
-            <p><strong>Username:</strong> ${username}</p>
-
-            <p><strong>Result:</strong> ${result}</p>
-
-            <p><strong>Similarity Score:</strong> ${similarity}</p>
-
-            <p><strong>Threshold:</strong> ${threshold}</p>
-
-            <p><strong>Confidence:</strong> ${confidence}</p>
-
-        `;
+        return;
 
     }
+
+
+    // Cosine similarity is displayed on a 0-100 visual scale.
+    // This is NOT a probability.
+
+    const percentage = Math.max(0, Math.min(100, score * 100));
+
+    const thresholdPercentage =
+        Math.max(0, Math.min(100, threshold * 100));
+
+
+    const isSuccess = data.same_speaker === true;
+
+    const statusClass = isSuccess ? "success" : "failed";
+
+
+    const statusText = isSuccess
+        ? "AUTHENTICATION SUCCESSFUL"
+        : "AUTHENTICATION FAILED";
+
+
+    const message = isSuccess
+
+        ? "The submitted voice sample meets the configured similarity threshold and matches the registered voice profile."
+
+        : "The submitted voice sample did not meet the configured similarity threshold. The registered voice could not be verified.";
+
+
+    box.className = "result-box";
+
+
+    box.innerHTML = `
+
+        <div class="similarity-result">
+
+            <div class="similarity-header">
+
+                <h3>Voice Verification Analysis</h3>
+
+                <span class="verification-status ${statusClass}">
+                    ${statusText}
+                </span>
+
+            </div>
+
+
+            <div class="similarity-score-section">
+
+                <div class="similarity-label">
+                    VOICE SIMILARITY SCORE
+                </div>
+
+                <div class="similarity-score">
+                    ${percentage.toFixed(2)}%
+                </div>
+
+                <div class="similarity-label">
+                    Scaled cosine similarity score (not a probability)
+                </div>
+
+            </div>
+
+
+            <div class="similarity-meter">
+
+                <div
+                    class="similarity-fill"
+                    style="width: ${percentage}%"
+                ></div>
+
+                <div
+                    class="threshold-marker"
+                    style="left: ${thresholdPercentage}%"
+                ></div>
+
+            </div>
+
+
+            <div class="meter-labels">
+
+                <span>0%</span>
+
+                <span>
+                    Threshold: ${thresholdPercentage.toFixed(0)}%
+                </span>
+
+                <span>100%</span>
+
+            </div>
+
+
+            <div class="similarity-details">
+
+
+                <div class="similarity-detail-card">
+
+                    <span>REGISTERED USER</span>
+
+                    <strong>${username}</strong>
+
+                </div>
+
+
+                <div class="similarity-detail-card">
+
+                    <span>CONFIDENCE LEVEL</span>
+
+                    <strong>${confidence}</strong>
+
+                </div>
+
+
+                <div class="similarity-detail-card">
+
+                    <span>PROCESSING TIME</span>
+
+                    <strong>${processingTime.toFixed(4)} sec</strong>
+
+                </div>
+
+
+                <div class="similarity-detail-card">
+
+                    <span>SIMILARITY SCORE</span>
+
+                    <strong>${score.toFixed(4)}</strong>
+
+                </div>
+
+
+                <div class="similarity-detail-card">
+
+                    <span>REQUIRED THRESHOLD</span>
+
+                    <strong>${threshold.toFixed(2)}</strong>
+
+                </div>
+
+
+                <div class="similarity-detail-card">
+
+                    <span>VERIFICATION RESULT</span>
+
+                    <strong>${result}</strong>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="verification-message ${statusClass}">
+
+                <strong>Verification Summary</strong>
+
+                <p>${message}</p>
+
+            </div>
+
+
+        </div>
+
+    `;
 
 }
 

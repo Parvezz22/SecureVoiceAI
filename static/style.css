@@ -770,3 +770,158 @@ tr:hover {
     }
 }
 
+/* ============================================================
+   FEATURE 3 - ADVANCED VOICE SIMILARITY ANALYSIS
+============================================================ */
+
+.similarity-result {
+    margin-top: 25px;
+    padding: 25px;
+    background: #111c32;
+    border: 1px solid #35415c;
+    border-radius: 16px;
+    color: #e8f0ff;
+}
+
+.similarity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.similarity-header h3 {
+    margin: 0;
+    font-size: 19px;
+}
+
+.verification-status {
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.verification-status.success {
+    background: #12372f;
+    color: #75e8b8;
+    border: 1px solid #23765a;
+}
+
+.verification-status.failed {
+    background: #3a1d29;
+    color: #ff9db2;
+    border: 1px solid #873c55;
+}
+
+.similarity-score-section {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.similarity-score {
+    font-size: 48px;
+    font-weight: 800;
+    color: #26c6da;
+    margin: 10px 0;
+}
+
+.similarity-label {
+    color: #9aaac5;
+    font-size: 13px;
+}
+
+.similarity-meter {
+    position: relative;
+    height: 13px;
+    background: #35415c;
+    border-radius: 20px;
+    margin: 25px 0 12px;
+}
+
+.similarity-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #087f91, #26c6da);
+    border-radius: 20px;
+    transition: width 0.8s ease;
+}
+
+.threshold-marker {
+    position: absolute;
+    top: -7px;
+    height: 27px;
+    width: 3px;
+    background: #ffffff;
+    z-index: 2;
+}
+
+.meter-labels {
+    display: flex;
+    justify-content: space-between;
+    color: #9aaac5;
+    font-size: 11px;
+}
+
+.similarity-details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.similarity-detail-card {
+    background: #1b2740;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid #35415c;
+}
+
+.similarity-detail-card span {
+    display: block;
+    color: #9aaac5;
+    font-size: 11px;
+    margin-bottom: 8px;
+}
+
+.similarity-detail-card strong {
+    font-size: 16px;
+    color: #26c6da;
+    overflow-wrap: anywhere;
+}
+
+.verification-message {
+    margin-top: 22px;
+    padding: 15px;
+    border-radius: 10px;
+    background: #1b2740;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.verification-message.success {
+    border-left: 4px solid #4adea5;
+}
+
+.verification-message.failed {
+    border-left: 4px solid #ff8199;
+}
+
+@media (max-width: 650px) {
+
+    .similarity-details {
+        grid-template-columns: 1fr;
+    }
+
+    .similarity-score {
+        font-size: 38px;
+    }
+
+    .similarity-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+}
+
