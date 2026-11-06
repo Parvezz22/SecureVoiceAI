@@ -39,6 +39,16 @@ def initialize_database():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS admin_users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            is_active INTEGER NOT NULL DEFAULT 1
+        )
+    """)
+
     connection.commit()
     connection.close()
 
@@ -152,10 +162,10 @@ def get_dashboard_stats():
     finally:
         connection.close()
 
+
 # GET AUTHENTICATION HISTORY
 
 def get_authentication_history(username=None, status=None):
-
     connection = get_connection()
     cursor = connection.cursor()
 
@@ -168,12 +178,10 @@ def get_authentication_history(username=None, status=None):
 
         parameters = []
 
-        # Filter by username
         if username:
             query += " AND username LIKE ?"
             parameters.append(f"%{username}%")
 
-        # Filter by authentication status
         if status:
             query += " AND authentication = ?"
             parameters.append(status.upper())
@@ -193,7 +201,6 @@ def get_authentication_history(username=None, status=None):
 # GET ALL REGISTERED USERS
 
 def get_all_users():
-
     connection = get_connection()
     cursor = connection.cursor()
 
@@ -208,92 +215,42 @@ def get_all_users():
 
     finally:
         connection.close()
-# MAIN
 
-if __name__ == "__main__":
-    initialize_database()
 
-    print("Database initialized successfully!")
-    print(get_dashboard_stats())
-
-# ============================================================
-# GET ANALYTICS DATA FOR INTERACTIVE DASHBOARD
-# ============================================================
+# GET ANALYTICS DATA
 
 def get_analytics_data():
-
     connection = get_connection()
     cursor = connection.cursor()
 
     try:
-
-        # ----------------------------------------------------
-        # AUTHENTICATION SUMMARY
-        # ----------------------------------------------------
-
         summary = cursor.execute("""
             SELECT
                 COUNT(*) AS total_attempts,
-
-                SUM(
-                    CASE
-                        WHEN authentication = 'SUCCESS'
-                        THEN 1 ELSE 0
-                    END
-                ) AS successful_attempts,
-
-                SUM(
-                    CASE
-                        WHEN authentication = 'FAILED'
-                        THEN 1 ELSE 0
-                    END
-                ) AS failed_attempts,
-
+                SUM(CASE WHEN authentication = 'SUCCESS'
+                    THEN 1 ELSE 0 END) AS successful_attempts,
+                SUM(CASE WHEN authentication = 'FAILED'
+                    THEN 1 ELSE 0 END) AS failed_attempts,
                 AVG(similarity_score) AS average_similarity,
-
                 AVG(processing_time) AS average_processing_time
-
             FROM authentication_logs
         """).fetchone()
-
-        # ----------------------------------------------------
-        # DAILY AUTHENTICATION ACTIVITY
-        # ----------------------------------------------------
 
         daily_activity = cursor.execute("""
             SELECT
                 date(timestamp) AS activity_date,
-
-                SUM(
-                    CASE
-                        WHEN authentication = 'SUCCESS'
-                        THEN 1 ELSE 0
-                    END
-                ) AS successful,
-
-                SUM(
-                    CASE
-                        WHEN authentication = 'FAILED'
-                        THEN 1 ELSE 0
-                    END
-                ) AS failed
-
+                SUM(CASE WHEN authentication = 'SUCCESS'
+                    THEN 1 ELSE 0 END) AS successful,
+                SUM(CASE WHEN authentication = 'FAILED'
+                    THEN 1 ELSE 0 END) AS failed
             FROM authentication_logs
-
             WHERE date(timestamp) >= date('now', 'localtime', '-6 days')
-
             GROUP BY date(timestamp)
-
             ORDER BY activity_date ASC
         """).fetchall()
 
-        # ----------------------------------------------------
-        # SIMILARITY SCORE DISTRIBUTION
-        # ----------------------------------------------------
-
         score_distribution = cursor.execute("""
             SELECT
-
                 CASE
                     WHEN similarity_score < 0.0 THEN 'Below 0.0'
                     WHEN similarity_score < 0.2 THEN '0.0 - 0.2'
@@ -302,33 +259,83 @@ def get_analytics_data():
                     WHEN similarity_score < 0.8 THEN '0.6 - 0.8'
                     ELSE '0.8 - 1.0'
                 END AS score_range,
-
                 COUNT(*) AS total
-
             FROM authentication_logs
-
             WHERE similarity_score IS NOT NULL
-
             GROUP BY score_range
-
             ORDER BY MIN(similarity_score)
-
         """).fetchall()
 
         return {
-
             "summary": dict(summary),
-
             "daily_activity": [
                 dict(row) for row in daily_activity
             ],
-
             "score_distribution": [
                 dict(row) for row in score_distribution
             ]
-
         }
 
     finally:
-
         connection.close()
+
+
+# CREATE ADMIN ACCOUNT
+
+def create_admin_user(username, password_hash):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    created_at = datetime.now().isoformat(timespec="seconds")
+
+    try:
+        cursor.execute("""
+            INSERT INTO admin_users (
+                username,
+                password_hash,
+                created_at,
+                is_active
+            )
+            VALUES (?, ?, ?, 1)
+        """, (username, password_hash, created_at))
+
+        connection.commit()
+        return True
+
+    except sqlite3.IntegrityError:
+        raise ValueError(
+            f"Admin username '{username}' already exists."
+        )
+
+    finally:
+        connection.close()
+
+
+# GET ADMIN ACCOUNT
+
+def get_admin_user(username):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        admin = cursor.execute("""
+            SELECT *
+            FROM admin_users
+            WHERE username = ?
+        """, (username,)).fetchone()
+
+        if admin is None:
+            return None
+
+        return dict(admin)
+
+    finally:
+        connection.close()
+
+
+# MAIN
+
+if __name__ == "__main__":
+    initialize_database()
+    print("Database initialized successfully!")
+    print(get_dashboard_stats())

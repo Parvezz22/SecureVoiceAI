@@ -32,9 +32,25 @@
         <a href="/users-page">Registered Users</a>
     </nav>
 
-    <div class="sidebar-footer">
-        AI-Powered Voice Security
-    </div>
+   <div class="sidebar-footer">
+
+    <form action="/admin/logout" method="POST">
+
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token }}"
+        >
+
+        <button type="submit" class="logout-button">
+            ↪ Logout
+        </button>
+
+    </form>
+
+    <p>AI-Powered Voice Security</p>
+
+</div>
 
 </div>
 

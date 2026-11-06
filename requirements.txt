@@ -6,3 +6,10 @@ numpy
 scipy
 librosa
 scikit-learn
+fastapi
+uvicorn
+python-multipart
+itsdangerous
+pwdlib[argon2]
+
+python-dotenv

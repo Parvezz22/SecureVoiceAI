@@ -1,10 +1,27 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
-
 import os
 import shutil
 import tempfile
+
+from pathlib import Path
+
+from fastapi import (
+    FastAPI,
+    UploadFile,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    Depends
+)
+
+from fastapi.responses import (
+    FileResponse,
+    HTMLResponse,
+    RedirectResponse
+)
+
+from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 
 from authentication_engine import (
     load_model,
@@ -25,6 +42,15 @@ from database import (
     get_analytics_data
 )
 
+from security import (
+    SESSION_SECRET,
+    SESSION_MAX_AGE,
+    authenticate_admin,
+    require_admin,
+    generate_csrf_token,
+    validate_csrf_token
+)
+
 
 # ============================================================
 # INITIALIZE FASTAPI
@@ -34,6 +60,19 @@ app = FastAPI(
     title="SecureVoiceAI",
     description="AI-powered Voice Authentication System",
     version="1.0"
+)
+
+
+# ============================================================
+# SECURE SESSION MIDDLEWARE
+# ============================================================
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SESSION_SECRET,
+    max_age=SESSION_MAX_AGE,
+    same_site="lax",
+    https_only=False
 )
 
 
@@ -66,30 +105,148 @@ def load_speaker_model():
 
 
 # ============================================================
-# HOME PAGE
+# ADMIN LOGIN PAGE
+# ============================================================
+
+@app.get("/admin/login")
+def admin_login_page(request: Request):
+
+    template_path = Path("templates/admin_login.html")
+
+    if not template_path.exists():
+        raise HTTPException(
+            status_code=500,
+            detail="Admin login template not found."
+        )
+
+    html = template_path.read_text(encoding="utf-8")
+
+    csrf_token = generate_csrf_token(request)
+
+    html = html.replace(
+        "{{ csrf_token }}",
+        csrf_token
+    )
+
+    return HTMLResponse(content=html)
+
+
+# ============================================================
+# ADMIN LOGIN API
+# ============================================================
+
+@app.post("/admin/login")
+async def admin_login(
+
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    csrf_token: str = Form(...)
+
+):
+
+    validate_csrf_token(
+        request,
+        csrf_token
+    )
+
+    admin = authenticate_admin(
+        username.strip(),
+        password
+    )
+
+    if not admin:
+
+        return HTMLResponse(
+            content=(
+                "<h3>Invalid username or password.</h3>"
+                '<a href="/admin/login">Try again</a>'
+            ),
+            status_code=401
+        )
+
+    # Clear previous session to prevent session fixation.
+    request.session.clear()
+
+    request.session["admin_username"] = admin["username"]
+
+    # Generate a fresh CSRF token for the authenticated session.
+    generate_csrf_token(request)
+
+    return RedirectResponse(
+        url="/",
+        status_code=303
+    )
+
+
+# ============================================================
+# ADMIN LOGOUT
+# ============================================================
+
+@app.post("/admin/logout")
+def admin_logout(
+
+    request: Request,
+    csrf_token: str = Form(...)
+
+):
+
+    validate_csrf_token(
+        request,
+        csrf_token
+    )
+
+    request.session.clear()
+
+    return RedirectResponse(
+        url="/admin/login",
+        status_code=303
+    )
+
+
+# ============================================================
+# HOME PAGE - ADMIN ONLY
 # ============================================================
 
 @app.get("/")
-def home():
+def home(
+    request: Request,
+    admin=Depends(require_admin)
+):
 
-    return FileResponse("templates/index.html")
+    html = Path("templates/index.html").read_text(
+        encoding="utf-8"
+    )
+
+    csrf_token = generate_csrf_token(request)
+
+    html = html.replace(
+        "{{ csrf_token }}",
+        csrf_token
+    )
+
+    return HTMLResponse(content=html)
 
 
 # ============================================================
-# PAGE ROUTES
+# PROTECTED PAGE ROUTES
 # ============================================================
 
 @app.get("/history-page")
-def history_page():
+def history_page(admin=Depends(require_admin)):
 
     return FileResponse("templates/history.html")
 
 
 @app.get("/users-page")
-def users_page():
+def users_page(admin=Depends(require_admin)):
 
     return FileResponse("templates/users.html")
 
+
+# ============================================================
+# PUBLIC VOICE OPERATION PAGES
+# ============================================================
 
 @app.get("/enroll-page")
 def enrollment_page():
@@ -129,7 +286,6 @@ async def authenticate_user(
 ):
 
     if verification_model is None:
-
         raise HTTPException(
             status_code=503,
             detail="Speaker model is not loaded"
@@ -182,7 +338,6 @@ async def authenticate_user(
     finally:
 
         if temp_path and os.path.exists(temp_path):
-
             os.remove(temp_path)
 
         await voice.close()
@@ -201,7 +356,6 @@ async def enroll_user(
 ):
 
     if verification_model is None:
-
         raise HTTPException(
             status_code=503,
             detail="Speaker model is not loaded"
@@ -266,7 +420,6 @@ async def enroll_user(
     finally:
 
         if temp_path and os.path.exists(temp_path):
-
             os.remove(temp_path)
 
         await voice.close()
@@ -286,7 +439,6 @@ async def enroll_live_user(
 ):
 
     if verification_model is None:
-
         raise HTTPException(
             status_code=503,
             detail="Speaker model is not loaded"
@@ -352,7 +504,6 @@ async def enroll_live_user(
         for path in temp_paths:
 
             if os.path.exists(path):
-
                 os.remove(path)
 
         await voice1.close()
@@ -360,17 +511,15 @@ async def enroll_live_user(
 
 
 # ============================================================
-# DASHBOARD STATISTICS API
+# DASHBOARD STATISTICS API - ADMIN ONLY
 # ============================================================
 
 @app.get("/dashboard-stats")
-def dashboard_stats():
+def dashboard_stats(admin=Depends(require_admin)):
 
     try:
 
-        stats = get_dashboard_stats()
-
-        return stats
+        return get_dashboard_stats()
 
     except Exception as e:
 
@@ -381,17 +530,15 @@ def dashboard_stats():
 
 
 # ============================================================
-# INTERACTIVE ANALYTICS API
+# INTERACTIVE ANALYTICS API - ADMIN ONLY
 # ============================================================
 
 @app.get("/analytics-data")
-def analytics_data():
+def analytics_data(admin=Depends(require_admin)):
 
     try:
 
-        analytics = get_analytics_data()
-
-        return analytics
+        return get_analytics_data()
 
     except Exception as e:
 
@@ -402,14 +549,15 @@ def analytics_data():
 
 
 # ============================================================
-# GET COMPLETE AUTHENTICATION HISTORY
+# AUTHENTICATION HISTORY - ADMIN ONLY
 # ============================================================
 
 @app.get("/authentication-history")
 def authentication_history(
 
     username: str = None,
-    status: str = None
+    status: str = None,
+    admin=Depends(require_admin)
 
 ):
 
@@ -433,7 +581,6 @@ def authentication_history(
         }
 
     except HTTPException:
-
         raise
 
     except Exception as e:
@@ -445,11 +592,11 @@ def authentication_history(
 
 
 # ============================================================
-# GET ALL REGISTERED USERS
+# REGISTERED USERS - ADMIN ONLY
 # ============================================================
 
 @app.get("/users")
-def registered_users():
+def registered_users(admin=Depends(require_admin)):
 
     try:
 

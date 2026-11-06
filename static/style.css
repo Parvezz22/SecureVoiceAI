@@ -925,3 +925,33 @@ tr:hover {
 
 }
 
+/* ADMIN LOGOUT BUTTON */
+
+.logout-form {
+    margin: 20px 15px;
+}
+
+.logout-button {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid rgba(255, 100, 120, 0.35);
+    border-radius: 8px;
+    background: rgba(255, 100, 120, 0.08);
+    color: #ff8199;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.logout-button:hover {
+    background: rgba(255, 100, 120, 0.18);
+    border-color: #ff8199;
+    transform: translateY(-2px);
+}
+
+.sidebar-footer p {
+    text-align: center;
+    font-size: 11px;
+    opacity: 0.65;
+}
