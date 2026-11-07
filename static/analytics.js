@@ -652,7 +652,7 @@ async function loadAnalytics() {
                     legend: {
                         position: "bottom",
                         labels: {
-                            color: chartMutedColor,
+                            color: getChartTheme().mutedColor,
                             font: {
                                 family: chartFontFamily,
                                 size: 12
@@ -663,7 +663,7 @@ async function loadAnalytics() {
                         }
                     },
 
-                    tooltip: commonTooltipOptions
+                    tooltip: buildTooltipOptions(getChartTheme())
 
                 }
 
@@ -797,7 +797,7 @@ async function loadAnalytics() {
                     legend: {
                         position: "bottom",
                         labels: {
-                            color: chartMutedColor,
+                            color: getChartTheme().mutedColor,
                             font: {
                                 family: chartFontFamily,
                                 size: 12
@@ -808,7 +808,7 @@ async function loadAnalytics() {
                         }
                     },
 
-                    tooltip: commonTooltipOptions
+                    tooltip: buildTooltipOptions(getChartTheme())
 
                 },
 
@@ -816,11 +816,11 @@ async function loadAnalytics() {
 
                     x: {
                         grid: {
-                            color: chartGridColor,
+                            color: getChartTheme().gridColor,
                             drawBorder: false
                         },
                         ticks: {
-                            color: chartMutedColor,
+                            color: getChartTheme().mutedColor,
                             font: {
                                 family: chartFontFamily,
                                 size: 11
@@ -833,13 +833,13 @@ async function loadAnalytics() {
                         beginAtZero: true,
 
                         grid: {
-                            color: chartGridColor,
+                            color: getChartTheme().gridColor,
                             drawBorder: false
                         },
 
                         ticks: {
                             precision: 0,
-                            color: chartMutedColor,
+                            color: getChartTheme().mutedColor,
                             font: {
                                 family: chartFontFamily,
                                 size: 11
@@ -920,7 +920,7 @@ async function loadAnalytics() {
                         display: false
                     },
 
-                    tooltip: commonTooltipOptions
+                    tooltip: buildTooltipOptions(getChartTheme())
 
                 },
 
@@ -931,7 +931,7 @@ async function loadAnalytics() {
                             display: false
                         },
                         ticks: {
-                            color: chartMutedColor,
+                            color: getChartTheme().mutedColor,
                             font: {
                                 family: chartFontFamily,
                                 size: 11
@@ -944,13 +944,13 @@ async function loadAnalytics() {
                         beginAtZero: true,
 
                         grid: {
-                            color: chartGridColor,
+                            color: getChartTheme().gridColor,
                             drawBorder: false
                         },
 
                         ticks: {
                             precision: 0,
-                            color: chartMutedColor,
+                            color: getChartTheme().mutedColor,
                             font: {
                                 family: chartFontFamily,
                                 size: 11
