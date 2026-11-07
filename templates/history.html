@@ -7,7 +7,23 @@
 
     <title>SecureVoiceAI | Authentication History</title>
 
+    <!-- Prevent theme flash by applying saved theme before styles render -->
+    <script>
+        (function () {
+            try {
+                var storedTheme = localStorage.getItem("securevoice_theme");
+                var theme = (storedTheme === "light" || storedTheme === "dark") ? storedTheme : "dark";
+                document.documentElement.setAttribute("data-theme", theme);
+            } catch (e) {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
+
     <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Theme Manager -->
+    <script src="/static/theme.js" defer></script>
 
     <style>
         .export-section {
@@ -35,6 +51,29 @@
         .export-section a:hover {
             opacity: 0.85;
         }
+
+        /* Light theme overrides for hardcoded export button colors */
+        [data-theme="light"] .export-csv {
+            background: rgba(5, 150, 105, 0.12);
+            border: 1px solid rgba(5, 150, 105, 0.3);
+            color: #047857;
+        }
+
+        [data-theme="light"] .export-csv:hover {
+            background: #059669;
+            color: #ffffff;
+        }
+
+        [data-theme="light"] .export-pdf {
+            background: rgba(2, 132, 199, 0.12);
+            border: 1px solid rgba(2, 132, 199, 0.3);
+            color: #0284c7;
+        }
+
+        [data-theme="light"] .export-pdf:hover {
+            background: #0284c7;
+            color: #ffffff;
+        }
     </style>
 
 </head>
@@ -48,8 +87,8 @@
     <nav>
         <a href="/">Dashboard</a>
         <a href="/enroll-page">Voice Enrollment</a>
-        <a href="/authenticate-page">Authentication</a>
-        <a href="/history-page" class="active">History</a>
+        <a href="/authenticate-page">Voice Authentication</a>
+        <a href="/history-page" class="active">Authentication History</a>
         <a href="/users-page">Registered Users</a>
     </nav>
 
@@ -69,8 +108,15 @@
             <p>Monitor and review voice authentication attempts.</p>
         </div>
 
-        <div class="status-badge">
-            System Online
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <button type="button" class="theme-toggle-btn" aria-label="Switch to light mode" title="Switch to light mode">
+                <span class="theme-icon" aria-hidden="true">☀️</span>
+                <span class="theme-label">Light Mode</span>
+            </button>
+
+            <div class="status-badge">
+                System Online
+            </div>
         </div>
 
     </header>

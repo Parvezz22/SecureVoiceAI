@@ -6,13 +6,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SecureVoiceAI | Dashboard</title>
+    <title>SecureVoiceAI | Dashboard</title>
 
-<link rel="stylesheet" href="/static/style.css">
+    <!-- Prevent theme flash by applying saved theme before styles render -->
+    <script>
+        (function () {
+            try {
+                var storedTheme = localStorage.getItem("securevoice_theme");
+                var theme = (storedTheme === "light" || storedTheme === "dark") ? storedTheme : "dark";
+                document.documentElement.setAttribute("data-theme", theme);
+            } catch (e) {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
 
-<!-- Chart.js Library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-```
+    <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Theme Manager -->
+    <script src="/static/theme.js" defer></script>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Dynamic System Health Monitor -->
+    <script src="/static/system-status.js" defer></script>
 
 </head>
 
@@ -27,7 +45,7 @@
     <nav>
         <a href="/" class="active">Dashboard</a>
         <a href="/enroll-page">Voice Enrollment</a>
-        <a href="/authenticate-page">Authentication</a>
+        <a href="/authenticate-page">Voice Authentication</a>
         <a href="/history-page">Authentication History</a>
         <a href="/users-page">Registered Users</a>
     </nav>
@@ -68,8 +86,16 @@
             <p>Welcome to your voice authentication system.</p>
         </div>
 
-        <div class="status-badge">
-            ● System Online
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <button type="button" class="theme-toggle-btn" aria-label="Switch to light mode" title="Switch to light mode">
+                <span class="theme-icon" aria-hidden="true">☀️</span>
+                <span class="theme-label">Light Mode</span>
+            </button>
+
+            <div id="systemStatusBadge" class="status-badge status-badge--loading" role="status" aria-live="polite" aria-atomic="true">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span id="systemStatusText">Checking Status...</span>
+            </div>
         </div>
 
     </header>
