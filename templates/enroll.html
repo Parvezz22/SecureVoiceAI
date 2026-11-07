@@ -6,11 +6,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Voice Enrollment | SecureVoiceAI</title>
 
-<title>Voice Enrollment | SecureVoiceAI</title>
+    <!-- Prevent theme flash by applying saved theme before styles render -->
+    <script>
+        (function () {
+            try {
+                var storedTheme = localStorage.getItem("securevoice_theme");
+                var theme = (storedTheme === "light" || storedTheme === "dark") ? storedTheme : "dark";
+                document.documentElement.setAttribute("data-theme", theme);
+            } catch (e) {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
 
-<link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css">
 
+    <!-- Theme Manager -->
+    <script src="/static/theme.js" defer></script>
 
 </head>
 
@@ -25,7 +39,7 @@
     <nav>
         <a href="/">Dashboard</a>
         <a href="/enroll-page" class="active">Voice Enrollment</a>
-        <a href="/authenticate-page">Authentication</a>
+        <a href="/authenticate-page">Voice Authentication</a>
         <a href="/history-page">Authentication History</a>
         <a href="/users-page">Registered Users</a>
     </nav>
@@ -50,8 +64,15 @@
             <p>Create your secure AI-powered voice identity.</p>
         </div>
 
-        <div class="status-badge">
-            ● System Online
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <button type="button" class="theme-toggle-btn" aria-label="Switch to light mode" title="Switch to light mode">
+                <span class="theme-icon" aria-hidden="true">☀️</span>
+                <span class="theme-label">Light Mode</span>
+            </button>
+
+            <div class="status-badge">
+                ● System Online
+            </div>
         </div>
 
     </header>

@@ -9,7 +9,23 @@
 
     <title>SecureVoiceAI | Voice Profile Management</title>
 
+    <!-- Prevent theme flash by applying saved theme before styles render -->
+    <script>
+        (function () {
+            try {
+                var storedTheme = localStorage.getItem("securevoice_theme");
+                var theme = (storedTheme === "light" || storedTheme === "dark") ? storedTheme : "dark";
+                document.documentElement.setAttribute("data-theme", theme);
+            } catch (e) {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
+
     <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Theme Manager -->
+    <script src="/static/theme.js" defer></script>
 
     <style>
         .profile-toolbar {
@@ -137,6 +153,60 @@
                 max-width: none;
             }
         }
+
+        /* Light theme overrides for hardcoded dark colors in this inline style block */
+        [data-theme="light"] .profile-search {
+            background: #ffffff;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            color: #0f172a;
+        }
+
+        [data-theme="light"] .profile-search:focus {
+            border-color: #0284c7;
+        }
+
+        [data-theme="light"] .profile-available {
+            background: rgba(16, 185, 129, 0.1);
+            color: #047857;
+        }
+
+        [data-theme="light"] .profile-missing {
+            background: rgba(245, 158, 11, 0.1);
+            color: #b45309;
+        }
+
+        [data-theme="light"] .delete-button {
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            color: #e11d48;
+        }
+
+        [data-theme="light"] .delete-button:hover {
+            background: #e11d48;
+            color: #ffffff;
+        }
+
+        [data-theme="light"] .profile-size {
+            color: #64748b;
+        }
+
+        [data-theme="light"] .message-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #047857;
+        }
+
+        [data-theme="light"] .message-error {
+            background: rgba(244, 63, 94, 0.1);
+            color: #be123c;
+        }
+
+        [data-theme="light"] .logout-button {
+            border-color: rgba(244, 63, 94, 0.25);
+            color: #e11d48;
+        }
+
+        [data-theme="light"] .logout-button:hover {
+            background: rgba(244, 63, 94, 0.08);
+        }
     </style>
 </head>
 
@@ -149,9 +219,9 @@
     <nav>
         <a href="/">Dashboard</a>
         <a href="/enroll-page">Voice Enrollment</a>
-        <a href="/authenticate-page">Authentication</a>
-        <a href="/history-page">History</a>
-        <a href="/users-page" class="active">Voice Profiles</a>
+        <a href="/authenticate-page">Voice Authentication</a>
+        <a href="/history-page">Authentication History</a>
+        <a href="/users-page" class="active">Registered Users</a>
     </nav>
 
     <div class="sidebar-footer">
@@ -175,8 +245,15 @@
             <p>Manage registered identities and their biometric profiles.</p>
         </div>
 
-        <div class="status-badge">
-            ● System Online
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <button type="button" class="theme-toggle-btn" aria-label="Switch to light mode" title="Switch to light mode">
+                <span class="theme-icon" aria-hidden="true">☀️</span>
+                <span class="theme-label">Light Mode</span>
+            </button>
+
+            <div class="status-badge">
+                ● System Online
+            </div>
         </div>
 
     </header>

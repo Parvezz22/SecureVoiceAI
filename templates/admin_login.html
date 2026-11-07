@@ -6,7 +6,23 @@
 
     <title>SecureVoiceAI | Admin Login</title>
 
+    <!-- Prevent theme flash by applying saved theme before styles render -->
+    <script>
+        (function () {
+            try {
+                var storedTheme = localStorage.getItem("securevoice_theme");
+                var theme = (storedTheme === "light" || storedTheme === "dark") ? storedTheme : "dark";
+                document.documentElement.setAttribute("data-theme", theme);
+            } catch (e) {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
+
     <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Theme Manager -->
+    <script src="/static/theme.js" defer></script>
 
     <style>
         body {
@@ -92,10 +108,73 @@
             font-size: 12px;
             margin-top: 25px;
         }
+
+        /* Theme toggle fixed to the top-right corner */
+        .login-theme-toggle {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 50;
+        }
+
+        /* Light theme overrides for hardcoded dark colors in this inline style block */
+        [data-theme="light"] body {
+            background: #f8fafc;
+        }
+
+        [data-theme="light"] .login-container {
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(14, 165, 233, 0.22);
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+        }
+
+        [data-theme="light"] .login-header h1 {
+            color: #0284c7;
+        }
+
+        [data-theme="light"] .login-header p {
+            color: #475569;
+        }
+
+        [data-theme="light"] .login-form label {
+            color: #334155;
+        }
+
+        [data-theme="light"] .login-form input {
+            background: #ffffff;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            color: #0f172a;
+        }
+
+        [data-theme="light"] .login-form input:focus {
+            border-color: #0284c7;
+        }
+
+        [data-theme="light"] .login-button {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #ffffff;
+        }
+
+        [data-theme="light"] .login-button:hover {
+            background: linear-gradient(135deg, #0369a1, #0284c7);
+            box-shadow: 0 0 18px rgba(2, 132, 199, 0.3);
+        }
+
+        [data-theme="light"] .security-note {
+            color: #64748b;
+        }
     </style>
 </head>
 
 <body>
+
+    <!-- THEME TOGGLE (top-right, fixed) -->
+    <div class="login-theme-toggle">
+        <button type="button" class="theme-toggle-btn" aria-label="Switch to light mode" title="Switch to light mode">
+            <span class="theme-icon" aria-hidden="true">☀️</span>
+            <span class="theme-label">Light Mode</span>
+        </button>
+    </div>
 
     <div class="login-container">
 
